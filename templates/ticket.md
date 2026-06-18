@@ -3,7 +3,7 @@ id: NNNN
 title: <한 줄 제목>
 branch: feat/<slug>
 base: main
-domain: <scene_* | data_*>
+domain: <domain-slug>
 stage: <M | C | V | MC ...>
 pattern: <TS | DM>      # 트랜잭션 스크립트 / 도메인 모델
 status: ready           # draft → ready → implementing → done
@@ -22,7 +22,7 @@ created: YYYY-MM-DD
 ## 2. 책임 도메인 분류
 | 항목 | 값 |
 |---|---|
-| 1차 책임 도메인 | `scene_*` / `data_*` |
+| 1차 책임 도메인 | `<domain-slug>` |
 | 단계 | M / C / V |
 | 가로지르는 도메인 | (의존 방향 표기) |
 | 분류 근거 | "이 데이터/규칙을 가진 곳이 책임진다" — 1~2줄 |
