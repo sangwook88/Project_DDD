@@ -2,7 +2,7 @@
 
 **막연한 아이디어를 구체화하고, 그것을 FE/BE 도메인 기반의 LLM 위키로 만들어, 개발과 이후 관리까지 한 흐름으로 끌고 가는 프레임워크.**
 
-아이디어 한 줄에서 시작해 정해진 단계로 구체화하면, 그 결과가 곧 **도메인별로 정리된 살아있는 위키**가 됩니다. 이 위키 하나가 사람이 읽는 문서이자, AI가 그대로 구현하는 계약서이자, 기능이 늘어도 비대해지지 않고 결정 이력이 쌓이는 관리 대장이 됩니다. AI는 값을 지어내지 않고, 게이트는 사람이 엽니다. Claude Code **플러그인**이라 어떤 프로젝트에서든 한 번 설치하면 바로 씁니다.
+아이디어 한 줄에서 시작해 정해진 단계로 구체화하면, 그 결과가 곧 **도메인별로 정리된 살아있는 위키**가 됩니다. 이 위키 하나가 사람이 읽는 문서이자, AI가 그대로 구현하는 계약서이자, 기능이 늘어도 비대해지지 않고 결정 이력이 쌓이는 관리 대장이 됩니다. AI는 값을 지어내지 않고, 게이트는 사람이 엽니다. Claude Code **플러그인**이라 어떤 프로젝트에서든 한 번 설치하면 바로 쓸 수 있습니다.
 
 ![Tool](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2)
 ![Skills](https://img.shields.io/badge/skills-11-339933)
@@ -43,7 +43,7 @@
 /plugin install fe-be-ddd@project-ddd
 ```
 
-이걸로 스킬 11종 + 에이전트 3종 + 템플릿 + `implement.ps1`이 자동 등록됩니다. 끝.
+이걸로 스킬 12종 + 에이전트 4종 + 템플릿 + `implement.ps1`이 자동 등록됩니다. 끝.
 
 로컬 클론에서 쓰려면 1단계만 경로로 바꿉니다(git 리포여야 상대경로 source가 해석됨):
 
@@ -62,6 +62,9 @@
 /fe-be-ddd:decompose
 /fe-be-ddd:ticket
 /fe-be-ddd:build
+
+# 운영 중 들어온 회의록·기획·리팩토링 문서를 raw/에 떨군 뒤
+/fe-be-ddd:intake
 ```
 
 `desk`는 자동 순회하지 않습니다 — 프로젝트 상태와 발화를 보고 지금 할 단계를 짚어줄 뿐, 게이트는 사람이 엽니다. ③ 구체화는 보통 FE 플로우 먼저 → 그 FE가 부르는 BE 순서입니다.
@@ -91,18 +94,19 @@
 
 | 단계 | 도구 | 역할 |
 |---|---|---|
-| 구현 | `build` (skill) → `master` (agent) → `plan`/`impl` (agents) / `implement.ps1 -Side <be\|fe>` | 도메인을 기획/구현 트랙으로 분류 → 참조 그래프로 wave 편성(BE 먼저 → FE) → 구현 에이전트(impl) 병렬, 또는 티켓/도메인을 `${CLAUDE_PLUGIN_ROOT}/scripts/implement.ps1`로 |
+| 구현 | `build` (skill) → `desk` (agent) → `plan`/`dev` (agents) / `implement.ps1 -Side <be\|fe>` | 도메인을 기획/구현 트랙으로 분류 → 참조 그래프로 wave 편성(BE 먼저 → FE) → 구현 에이전트(dev) 병렬, 또는 티켓/도메인을 `${CLAUDE_PLUGIN_ROOT}/scripts/implement.ps1`로 |
 | 위키 유지 | (도메인 폴더) | 도메인 폴더가 단일 소스. HOME이 색인, 일지가 결정 이력 |
 
 ### 에이전트 (역할별)
 
 | 에이전트 | 역할 | 따르는 스킬 |
 |---|---|---|
-| `master` | 오케스트레이터 — 도메인을 기획/구현으로 분류, wave 편성, 디스패치 | `build` |
+| `desk` | 오케스트레이터 — 도메인을 기획/구현으로 분류, wave 편성, 디스패치 | `build` |
 | `plan` | 기획 — 분할·전역 규약·도메인 폴더 골격 작성(값은 슬롯) | `decompose`·`plan-fe`·`plan-be`·`arch` |
-| `impl` | 구현 — 배정 도메인 폴더(`docs/be/*/`·`docs/fe/*/`) 또는 티켓 1개 구현 | `impl` |
+| `dev` | 구현 — 배정 도메인 폴더(`docs/be/*/`·`docs/fe/*/`) 또는 티켓 1개 구현 | `dev` |
+| `intake` | 접수 — raw 문서 1개를 트랙 분류해 plan/dev로 디스패치(문서당 브랜치) | `intake` |
 
-`master`가 BE·FE 도메인을 모두 `impl` 에이전트로 배정합니다(BE 먼저 → FE). **계약이 BE/FE를 선언하므로 구현 에이전트는 한 종류** — 트랙별로 가르지 않습니다.
+`desk`가 BE·FE 도메인을 모두 `dev` 에이전트로 배정합니다(BE 먼저 → FE). **계약이 BE/FE를 선언하므로 구현 에이전트는 한 종류** — 트랙별로 가르지 않습니다.
 
 ## 작동 방식
 
@@ -111,10 +115,28 @@ desk(라우터)가 상태 보고 단계 안내
   -> 단계 스킬이 도메인 폴더에 계약서(슬롯) 작성
   -> distill / qa / arch 로 정제·검증
   -> ticket 이 자기완결 티켓 생성
-  -> build -> master 가 참조 그래프로 wave 편성(BE 먼저 -> FE)
-  -> impl 에이전트가 도메인 폴더/티켓을 계약서대로 병렬 구현
+  -> build -> desk(agent) 가 참조 그래프로 wave 편성(BE 먼저 -> FE)
+  -> dev 에이전트가 도메인 폴더/티켓을 계약서대로 병렬 구현
   -> 결과는 docs/ 위키와 일지에 누적
 ```
+
+### 변경 접수 (intake) — 운영 중 들어오는 문서
+
+서비스가 굴러가는 중에 나오는 **회의록·신규 기획·리팩토링 메모**는 `raw/` 인박스에 `.md`로 떨굽니다. `intake`가 문서별로 브랜치를 파고 트랙을 갈라 처리합니다.
+
+```text
+raw/<문서>.md  (인박스에 떨굼)
+  -> /intake 스킬: raw/ 스캔 -> 사람이 처리할 문서 선택
+  -> 문서마다 git 브랜치(worktree) + intake 에이전트 1개 디스패치
+  -> intake 에이전트가 문서를 분류:
+       ① 새 도메인 경계 필요 -> 멈추고 "메인에서 decompose 하세요"(경계는 사람 게이트)
+       ② 기존 도메인 기획 수정 -> plan이 문서 수정 + dev가 티켓만 발행 -> 멈춤
+                                  [사람이 브랜치에서 티켓 검수] -> 재트리거 시 dev가 구현
+       ③ 작은 구현 수정       -> dev가 티켓 발급 + 바로 구현
+  -> 브랜치에 로컬 커밋만(push·merge는 사람)
+```
+
+`decompose`가 *맨 처음* 도메인 경계를 가르는 단계라면, `intake`는 *운영 중* 들어오는 문서를 기존 위키에 반영·구현으로 라우팅하는 상시 입구입니다.
 
 산출물(`docs/HOME.md`·`docs/fe|be/*/`·`docs/arch/ARCHITECTURE.md`·`tickets/`·`_qa/`)은 모두 **대상 프로젝트** 작업 디렉토리에 생깁니다. 번들 리소스(`templates/`·`docs/conventions.md`·`scripts/implement.ps1`)는 스킬·에이전트 안에서 `${CLAUDE_PLUGIN_ROOT}`로 참조되어 설치 위치와 무관하게 해석됩니다.
 
@@ -124,7 +146,7 @@ desk(라우터)가 상태 보고 단계 안내
 - 최상위 분할은 FE/BE. 참조는 FE → BE 단방향.
 - 기능 추가 = 폴더에 파일 추가(요소/기능). 페이지 비대화 금지.
 - 도메인 폴더 `일지.md`로 결정 이력 축적(LLM 위키).
-- 구현 에이전트(`impl`)는 배정된 도메인 폴더(또는 티켓)만 계약서대로 구현, 경계 밖 금지. 계약이 FE/BE를 선언하므로 구현 에이전트는 한 종류.
+- 구현 에이전트(`dev`)는 배정된 도메인 폴더(또는 티켓)만 계약서대로 구현, 경계 밖 금지. 계약이 FE/BE를 선언하므로 구현 에이전트는 한 종류.
 - `일지.md`는 쓰기 전용(디버그 로그) — 에이전트가 읽지 않는다.
 
 ## 위키 배치 (기본 `docs/`)
@@ -138,13 +160,14 @@ docs/arch/ARCHITECTURE.md 전역 규약 + 기술 스택
 docs/brainstorming/*-brief.md  brainstorm 설계 브리프
 _qa/<fe>.html             qa HTML 아티팩트
 tickets/<fe|be>/NNNN-*.md 구현 티켓
+raw/<문서>.md             intake 인박스(회의록·신규기획·리팩토링) — 처리되면 raw/_done/로
 ```
 
 ## 설치 — 자세히
 
 이 레포 루트가 곧 **단일 플러그인을 담은 마켓플레이스**(`.claude-plugin/marketplace.json` + `.claude-plugin/plugin.json`)입니다.
 
-- 설치하면 스킬 11종(`brainstorm`·`decompose`·`plan-fe`·`plan-be`·`distill`·`qa`·`arch`·`ticket`·`build`·`desk`·`impl`)과 에이전트 3종(`master`·`plan`·`impl`)이 자동 등록됩니다. 플러그인 스킬은 이름공간이 붙어 `/fe-be-ddd:desk`처럼 보입니다.
+- 설치하면 스킬 12종(`brainstorm`·`decompose`·`plan-fe`·`plan-be`·`distill`·`qa`·`arch`·`ticket`·`build`·`desk`·`dev`·`intake`)과 에이전트 4종(`desk`·`plan`·`dev`·`intake`)이 자동 등록됩니다. 플러그인 스킬은 이름공간이 붙어 `/fe-be-ddd:desk`처럼 보입니다. (`desk`·`intake`는 각각 기획/접수 단계의 라우터 **스킬**이자 구현 단계의 오케스트레이터 **에이전트** — 같은 "비서" 역할을 단계에 맞춰 맡습니다.)
 - **일지 하네스(선택)** — `일지.md` 쓰기 전용 규칙을 켜려면 `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.snippet.md` 내용을 대상 프로젝트 `CLAUDE.md`에 한 번 붙여넣습니다(플러그인은 CLAUDE.md를 자동 주입하지 않음).
 - 업데이트: `/plugin marketplace update project-ddd` 후 `/plugin update fe-be-ddd@project-ddd`. (`version`을 안 박아 매 커밋이 새 버전으로 잡힙니다.)
 
