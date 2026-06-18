@@ -8,7 +8,7 @@
     {
       "name": "fe-be-ddd",
       "source": "./",
-      "description": "FE↔BE 2분할 도메인 기획→구현 워크플로우(스킬 11종 + 에이전트 3종 + 템플릿 + implement.ps1)."
+      "description": "FE↔BE 2분할 도메인 기획→구현 워크플로우(스킬 12종 + 에이전트 4종 + 템플릿 + implement.ps1)."
     }
   ]
 }
