@@ -3,7 +3,7 @@ id: NNNN
 title: <한 줄 제목>
 branch: feat/<slug>
 base: main
-domain: <domain-slug>
+domain: <fe/<name> | be/<name>>
 stage: <M | C | V | MC ...>
 pattern: <TS | DM>      # 트랜잭션 스크립트 / 도메인 모델
 status: ready           # draft → ready → implementing → done
@@ -13,7 +13,7 @@ created: YYYY-MM-DD
 
 # [NNNN] <한 줄 제목>
 
-> 구현 에이전트에게: **이 티켓에 적힌 것만 구현한다.** 규약 SoT = [ARCHITECTURE.md](../docs/arch/ARCHITECTURE.md). 모호하면 추측 말고 멈추고 질문(`status: draft`로 되돌림). 「범위 경계」 밖 파일은 건드리지 않는다.
+> 구현 에이전트에게: **이 티켓에 적힌 것만 구현한다.** 규약 SoT = [ARCHITECTURE.md](../../docs/arch/ARCHITECTURE.md). 모호하면 추측 말고 멈추고 질문(`status: draft`로 되돌림). 「범위 경계」 밖 파일은 건드리지 않는다.
 
 ## 1. 배경·목표
 *왜 / 끝나면 무엇이 되나. 기획 근거 링크.*
@@ -28,7 +28,7 @@ created: YYYY-MM-DD
 | 분류 근거 | "이 데이터/규칙을 가진 곳이 책임진다" — 1~2줄 |
 
 ## 3. 구조 결정 (패턴 타협)
-*트랜잭션 스크립트(TS) vs 도메인 모델(DM) — dev-arch 정책 기본값 + 이 기능 성격. 기존 계승 vs 대안 + 왜.*
+*트랜잭션 스크립트(TS) vs 도메인 모델(DM) — arch 정책 기본값 + 이 기능 성격. 기존 계승 vs 대안 + 왜.*
 - 채택: <TS / DM> · <기존 계승 / 대안> — 왜
 - (규약 이탈이면) 근거 + 도메인 일지 링크
 
