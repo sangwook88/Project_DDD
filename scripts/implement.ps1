@@ -2,7 +2,7 @@
 .SYNOPSIS
     구현 티켓(tickets/NNNN-*.md) 1장을 구현 엔진(codex 기본 / claude)에 넘겨 새 브랜치에서 "구현만" 시킨다.
 .DESCRIPTION
-    dev-ticket 스킬이 만든 자기완결 티켓을 입력으로: ① 프런트매터(branch/base/status/engine) 읽기
+    자기완결 도메인 페이지(또는 티켓)를 입력으로: ① 프런트매터(branch/base/status/engine) 읽기
     ② base에서 branch 체크아웃 ③ 엔진을 헤드리스로 띄워 "이 티켓만 보고 구현". 커밋·푸시는 사람.
 .PARAMETER Ticket   티켓 .md 경로 (Ticket 또는 Domain 중 하나 필수)
 .PARAMETER Domain   도메인 페이지 .md 경로 (docs/domains/<name>.md). Ticket 대신 이걸 주면 도메인 계약서로 구현.
