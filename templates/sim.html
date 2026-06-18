@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<title>시뮬레이션 — __SCENE__</title>
+<style>
+  body{font:15px/1.6 system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 16px;color:#222}
+  h1{font-size:20px} .step{border:1px solid #ddd;border-radius:8px;padding:12px 16px;margin:10px 0}
+  .step h3{margin:0 0 6px} .state{background:#f6f8fa;padding:8px;border-radius:6px;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:13px}
+  .ex{color:#0a7} .slot{color:#c50;font-weight:600} button{margin:4px 6px 0 0;padding:6px 12px;border:1px solid #888;border-radius:6px;background:#fff;cursor:pointer}
+  button:hover{background:#eef} .gaps{margin-top:28px;border-top:2px solid #333;padding-top:12px}
+  .gaps h2{font-size:17px} textarea{width:100%;min-height:80px;font:13px/1.5 ui-monospace,monospace;margin:6px 0}
+  .hidden{display:none}
+</style></head>
+<body>
+<h1>플로우 시뮬레이션 — __SCENE__</h1>
+<p>예시 데이터(<span class="ex">[예시]</span>)로 그린 대로만 워크. 미정 값은 <span class="slot">[입력 필요]</span>.</p>
+
+<div id="steps">
+  <!-- plan-simulate 가 노드 순서대로 .step 블록을 채운다. 예시 1개: -->
+  <div class="step" data-node="진입">
+    <h3>1. 진입</h3>
+    <div class="state">입력: <span class="ex">[예시] user=42</span>
+호출: (없음)
+출력: sessionId=<span class="ex">[예시] s_001</span></div>
+    <button onclick="go('노드A')">다음 →</button>
+  </div>
+  <!-- 분기 노드 예시 -->
+  <div class="step hidden" data-node="노드A">
+    <h3>2. 노드A — 분기</h3>
+    <div class="state">조건: amount &gt; <span class="slot">[입력 필요: 임계치]</span></div>
+    <button onclick="go('성공')">초과</button>
+    <button onclick="go('실패')">이하</button>
+  </div>
+</div>
+
+<div class="gaps">
+  <h2>① 씬 플로우에서 놓친 부분</h2>
+  <textarea>- (7렌즈 초안) 노드A: else 분기 미정의 — [입력 필요]
+- </textarea>
+  <h2>② 데이터 처리에서 미고려 기능</h2>
+  <textarea>- (7렌즈 초안) 임계치 경계값(0·최대) 처리 미정 — [입력 필요]
+- </textarea>
+</div>
+
+<script>
+function go(node){
+  document.querySelectorAll('.step').forEach(s=>s.classList.add('hidden'));
+  const t=document.querySelector('.step[data-node="'+node+'"]');
+  if(t) t.classList.remove('hidden');
+  else alert('문서에 없는 전이: '+node+' → 플로우 누락 후보');
+}
+</script>
+</body></html>
