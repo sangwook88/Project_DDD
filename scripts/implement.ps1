@@ -1,24 +1,29 @@
 <#
 .SYNOPSIS
-    구현 티켓(tickets/NNNN-*.md) 1장을 구현 엔진(codex 기본 / claude)에 넘겨 새 브랜치에서 "구현만" 시킨다.
+    구현 티켓(tickets/<side>/NNNN-*.md) 또는 도메인 폴더 1개를 구현 엔진(codex 기본 / claude)에 넘겨 새 브랜치에서 "구현만" 시킨다.
 .DESCRIPTION
-    자기완결 도메인 페이지(또는 티켓)를 입력으로: ① 프런트매터(branch/base/status/engine) 읽기
+    자기완결 도메인 폴더/페이지(또는 티켓)를 입력으로: ① 프런트매터(branch/base/status/engine) 읽기
     ② base에서 branch 체크아웃 ③ 엔진을 헤드리스로 띄워 "이 티켓만 보고 구현". 커밋·푸시는 사람.
-.PARAMETER Ticket   티켓 .md 경로 (Ticket 또는 Domain 중 하나 필수)
-.PARAMETER Domain   도메인 페이지 .md 경로 (docs/domains/<name>.md). Ticket 대신 이걸 주면 도메인 계약서로 구현.
+    -Ticket/-Domain 은 전체 경로 또는 측 상대 이름(번호·slug)으로 받는다. 측 상대면 -Side 가 가리키는 tickets/<side>·docs/<side> 밑에서 찾는다.
+.PARAMETER Ticket   티켓 .md 경로 또는 측 상대 이름. (Ticket 또는 Domain 중 하나 필수)
+.PARAMETER Domain   도메인 폴더 경로(docs/be/<name>/ 또는 docs/fe/<name>/) 또는 측 상대 이름. 폴더 README.md 프런트매터를 읽고 폴더 전체를 계약서로 구현. (하위호환: 단일 .md 도 허용)
+.PARAMETER Side     be | fe. 측 상대 이름을 줄 때 어느 측에서 찾을지. 전체 경로면 생략 가능.
 .PARAMETER Base     분기 기준. 미지정 시 입력 base, 없으면 main.
 .PARAMETER Engine   codex | claude. 미지정 시 입력 engine, 없으면 codex.
 .PARAMETER NoBranch 브랜치 안 따고 현재 브랜치에서.
 .PARAMETER DryRun   무엇을 할지만 출력.
 .EXAMPLE
-    pwsh scripts/implement.ps1 -Ticket tickets/0001-foo.md
+    pwsh scripts/implement.ps1 -Side be 0001-order-calc      # tickets/be/0001-order-calc.md 자동 해석
 .EXAMPLE
-    pwsh scripts/implement.ps1 -Domain docs/domains/auth.md
+    pwsh scripts/implement.ps1 -Side fe -Domain checkout       # docs/fe/checkout/ 자동 해석
+.EXAMPLE
+    pwsh scripts/implement.ps1 -Ticket tickets/be/0001-foo.md  # 전체 경로면 -Side 불필요
 #>
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)][string]$Ticket,
     [string]$Domain,
+    [ValidateSet('be', 'fe')][string]$Side,
     [string]$Base,
     [ValidateSet('codex', 'claude')][string]$Engine,
     [switch]$NoBranch,
@@ -32,15 +37,35 @@ function Info($m) { Write-Host "[implement] $m" -ForegroundColor Cyan }
 $repo = (& git rev-parse --show-toplevel 2>$null); if (-not $repo) { Fail "git 리포가 아닙니다." }
 $repo = $repo.Trim()
 
+# 측 상대 이름(번호·slug) → tickets/<side>·docs/<side> 밑에서 해석. 전체 경로면 그대로.
+function Resolve-Side([string]$p, [string]$kind) {
+    if (-not $p) { return $p }
+    if (Test-Path $p) { return $p }
+    if (-not $Side) { Fail "'$p' 는 전체 경로가 아닙니다 — 측 상대 이름이면 -Side be|fe 를 주세요." }
+    $base = if ($kind -eq 'ticket') { "tickets/$Side" } else { "docs/$Side" }
+    foreach ($cand in @((Join-Path $base $p), (Join-Path $base "$p.md"))) {
+        if (Test-Path (Join-Path $repo $cand)) { return $cand }
+    }
+    return $p
+}
+
 if ($Ticket -and $Domain) { Fail "-Ticket 과 -Domain 중 하나만 주세요." }
-if ($Domain) { $inputPath = $Domain; $kind = '도메인 페이지' } elseif ($Ticket) { $inputPath = $Ticket; $kind = '티켓' } else { Fail "-Ticket 또는 -Domain 경로가 필요합니다." }
-if (-not (Test-Path $inputPath)) { Fail "$kind 없음: $inputPath" }
+if ($Domain) { $inputPath = Resolve-Side $Domain 'domain'; $isDomain = $true }
+elseif ($Ticket) { $inputPath = Resolve-Side $Ticket 'ticket'; $isDomain = $false }
+else { Fail "-Ticket 또는 -Domain 경로가 필요합니다." }
+if (-not (Test-Path $inputPath)) { Fail "입력 없음: $inputPath" }
 $ticketFull = (Resolve-Path $inputPath).Path
+$isDir = (Get-Item $ticketFull).PSIsContainer
+if ($isDomain) {
+    if ($isDir) { $kind = '도메인 폴더'; $fmFile = Join-Path $ticketFull 'README.md'; if (-not (Test-Path $fmFile)) { Fail "도메인 폴더에 README.md 없음: $inputPath" } }
+    else { $kind = '도메인 페이지'; $fmFile = $ticketFull }
+}
+else { $kind = '티켓'; $fmFile = $ticketFull }
 $ticketRel = $ticketFull.Substring($repo.Length).TrimStart('\', '/') -replace '\\', '/'
-$raw = Get-Content -Raw -Encoding UTF8 $ticketFull
+$raw = Get-Content -Raw -Encoding UTF8 $fmFile
 
 $fm = @{}
-$m = [regex]::Match($raw, '(?s)^\uFEFF?---\s*\r?\n(.*?)\r?\n---\s*\r?\n')
+$m = [regex]::Match($raw, '(?s)^﻿?---\s*\r?\n(.*?)\r?\n---\s*\r?\n')
 if ($m.Success) {
     foreach ($line in ($m.Groups[1].Value -split "`n")) {
         $kv = [regex]::Match($line, '^\s*([A-Za-z_]+)\s*:\s*(.+?)\s*(#.*)?$')
@@ -52,7 +77,10 @@ if (-not $Base) { $Base = $fm['base']; if (-not $Base) { $Base = 'main' } }
 if (-not $Engine) { $Engine = $fm['engine']; if (-not $Engine) { $Engine = 'codex' } }
 $status = $fm['status']
 if ($status -eq 'draft') { Fail "티켓 status 가 'draft' — 미결 갈림길. status: ready 로 닫으세요." }
-if ($Domain -and $raw -match '\[입력 필요') { Fail "도메인 페이지에 '[입력 필요]' 슬롯이 남아 있습니다 — 채운 뒤 다시 실행하세요." }
+if ($isDomain) {
+    $slotFiles = if ($isDir) { Get-ChildItem -Path $ticketFull -Recurse -Filter *.md } else { Get-Item $ticketFull }
+    foreach ($sf in $slotFiles) { if ((Get-Content -Raw -Encoding UTF8 $sf.FullName) -match '\[입력 필요') { Fail "도메인 문서에 '[입력 필요]' 슬롯이 남아 있습니다: $($sf.Name) — 채운 뒤 다시 실행하세요." } }
+}
 if (-not $NoBranch -and -not $branch) { Fail "프런트매터에 branch 가 없습니다. -NoBranch 를 쓰거나 branch: 를 채우세요." }
 Info "${kind}: $ticketRel / 엔진: $Engine / status: $status"
 
@@ -78,11 +106,11 @@ $curBranch = (& git -C $repo rev-parse --abbrev-ref HEAD).Trim()
 Info "작업 브랜치: $curBranch"
 
 $prompt = @"
-너는 이 리포에서 $kind 1장을 구현하는 에이전트다. 지금 브랜치는 '$curBranch'.
-읽을 ${kind}: $ticketRel
+너는 이 리포에서 $kind 1개를 구현하는 에이전트다. 지금 브랜치는 '$curBranch'.
+읽을 ${kind}: $ticketRel  (도메인 폴더면 그 안의 README·플로우/요소 또는 데이터/기능 문서를 전부 읽어라)
 규약 SoT: docs/arch/ARCHITECTURE.md (먼저 읽어라).
 규칙(엄수):
-1. $kind 를 끝까지 읽고 「구현목표/수용기준」(또는 「변경 대상」「인터페이스·시그니처」「엣지 케이스」)대로만 구현한다.
+1. $kind 를 끝까지 읽고 「구현목표/수용기준」(도메인 폴더면 데이터.md·기능_*.md 또는 플로우·요소)대로만 구현한다.
 2. 「경계 — 하지 말 것」을 절대 어기지 않는다: 지정 범위 밖 수정·재설계·리네이밍·겸사겸사 리팩터·새 의존 추가 금지. 의존 도메인은 읽기만.
 3. 코드 영문 / 주석·문서 한국어. 명명·직렬화는 ARCHITECTURE 컨벤션을 따른다.
 4. 「수용 기준」을 모두 충족한다(엣지 케이스 행이 있으면 각 행도).
