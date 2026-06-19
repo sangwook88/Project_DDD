@@ -5,7 +5,7 @@ description: FE 도메인 1개의 플로우 + 표현(V)을 사람과 끌어내�
 
 # plan-fe — FE 도메인 명세 (기획 전단 3단계, FE 축)
 
-FE 도메인의 *플로우 + 표현(V)*을 끌어낸다. 짝: [plan-be](../plan-be/SKILL.md)(BE M+C). 전제: [decompose](../decompose/SKILL.md)로 HOME 확정. 규약: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md). 산출: `docs/fe/<name>/`.
+FE 도메인의 *플로우 + 표현(V)*을 끌어낸다. 짝: [plan-be](../plan-be/SKILL.md)(BE M+C). 전제: [decompose](../decompose/SKILL.md)로 HOME 확정. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/fe/<name>/`.
 
 ## 경계 (절대 규칙)
 - FE = **플로우(오케스트레이션) + 표현(V)** 만. 기능 구현 로직 금지 — 그건 BE 도메인. 요소 §호출하는 기능은 BE 기능 **링크만**.
@@ -26,7 +26,7 @@ FE 도메인의 *플로우 + 표현(V)*을 끌어낸다. 짝: [plan-be](../plan-
 3. **플로우 브레인스토밍** — 대화로 노드/간선을 함께 그린다. 한 번에 하나씩, mermaid 초안 보여주고 확인(노드 = 요소 1개).
 4. **값·구체화 브레인스토밍** — 입력 계약 · 노드 간 전이값 · 출력을 끌어낸다. **추상·모호한 문장("적절히 처리", "필요시 갱신")은 한 번에 하나씩 구체값을 캐묻는다**(수치·범위·규칙·시점). 값은 사람이 답하고 AI는 [입력 필요] 슬롯·질문만.
 5. **요소·BE 참조 확정** — 노드 목록 = 요소 목록(한국어 파일명). 각 노드가 부르는 BE 도메인 기능을 추려 링크 후보로(HOME 참조 그래프와 대조).
-6. **골격 생성** — `${CLAUDE_PLUGIN_ROOT}/templates/`의 도메인폴더-README·플로우·요소를 복사·토큰 치환(기울임 안내문 유지). BE 도메인 골격이 필요하면 [plan-be](../plan-be/SKILL.md) 호출.
+6. **골격 생성** — `${DDD_ROOT}/templates/`의 도메인폴더-README·플로우·요소를 복사·토큰 치환(기울임 안내문 유지). BE 도메인 골격이 필요하면 [plan-be](../plan-be/SKILL.md) 호출.
 
 ## 산출
 - `플로우.md` = mermaid + FE 전체 값. `요소/<노드>.md` = 요소 템플릿 7섹션. `README.md` 구성 = `요소/<노드>.md` 링크 목차.

@@ -1,0 +1,28 @@
+{
+  "name": "fe-be-ddd",
+  "version": "0.1.0",
+  "description": "FE/BE DDD 기획→구현 프레임워크를 ~/.claude 로 접두사 없이 설치하는 npx 인스톨러 (에이전트 5종 + 스킬 12종 + 템플릿/스크립트 번들).",
+  "type": "module",
+  "bin": {
+    "fe-be-ddd": "bin/install.mjs"
+  },
+  "files": [
+    "bin/",
+    "agents/",
+    "skills/",
+    "templates/",
+    "scripts/",
+    "docs/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/lsc892/Project_DDD",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lsc892/Project_DDD.git"
+  }
+}

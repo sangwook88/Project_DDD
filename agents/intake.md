@@ -7,7 +7,7 @@ model: opus
 
 # intake — raw 문서 접수·분류·디스패치 (문서 1개)
 
-raw 문서 **1개**를 받아 어느 트랙으로 처리할지 가르고 역할 에이전트(`plan`/`dev`)로 디스패치하는 두뇌. **직접 구현하지 않는다.** 자기 git 브랜치/worktree에서 격리 실행되며, 결과는 그 브랜치에 **로컬 커밋만** 한다. 규약 SoT: `docs/arch/ARCHITECTURE.md`. 분류 기준: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md).
+raw 문서 **1개**를 받아 어느 트랙으로 처리할지 가르고 역할 에이전트(`plan`/`dev`)로 디스패치하는 두뇌. **직접 구현하지 않는다.** 자기 git 브랜치/worktree에서 격리 실행되며, 결과는 그 브랜치에 **로컬 커밋만** 한다. 규약 SoT: `docs/arch/ARCHITECTURE.md`. 분류 기준: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md).
 
 ## 입력 계약
 - raw 문서 1개 경로: `raw/<doc>.md` (intake 스킬이 브랜치와 함께 넘김).
@@ -30,9 +30,10 @@ raw 문서 **1개**를 받아 어느 트랙으로 처리할지 가르고 역할 
 
 ## 2. 트랙 ② — 기획 수정 (2단계 정지)
 **접수(1단계) 모드:**
-1. **plan 디스패치** — `Agent`(subagent_type: `plan`, 플러그인 설치 시 `fe-be-ddd:plan`)로 해당 도메인 폴더 문서를 문서 내용대로 수정시킨다. 값은 짓지 말고 `[입력 필요]` 슬롯으로. 닿는 도메인이 여럿이고 서로 독립이면 한 메시지에서 병렬.
-2. **dev 디스패치(티켓만)** — `Agent`(subagent_type: `dev`)로 수정된 계약대로 **티켓만 발행**(`tickets/<fe|be>/NNNN-*.md`)시킨다. **구현은 시키지 않는다.**
-3. **멈추고 보고** — "기획 수정 반영 + 티켓 N장 발행. 브랜치 `<name>`에서 티켓 검수 바람. 검수 후 intake 스킬로 구현(2단계) 재트리거." 브랜치에 커밋(문서 수정 + 티켓).
+1. **plan 디스패치** — `Agent`(subagent_type: `plan`)로 해당 도메인 폴더 문서를 문서 내용대로 수정시킨다(distill 정제 포함). 값은 짓지 말고 `[입력 필요]` 슬롯으로. 닿는 도메인이 여럿이고 서로 독립이면 한 메시지에서 병렬.
+2. **qa 디스패치(FE 플로우·분기가 바뀌었으면)** — `Agent`(subagent_type: `qa`)로 그 FE 도메인의 HTML(`_qa/<fe>.html`)을 다시 만들어 누락 분기를 점검한다. HTML 생성까지만(융합은 사람 피드백 후 2단계, 또는 검수 항목에 포함). 순수 BE 데이터·규칙 변경이면 생략.
+3. **dev 디스패치(티켓만)** — `Agent`(subagent_type: `dev`, 티켓 발행 모드)로 수정된 계약대로 **티켓만 발행**(`tickets/<fe|be>/NNNN-*.md`)시킨다. **구현은 시키지 않는다.**
+4. **멈추고 보고** — "기획 수정 반영(+QA HTML) + 티켓 N장 발행. 브랜치 `<name>`에서 티켓·QA 검수 바람. 검수 후 intake 스킬로 구현(2단계) 재트리거." 브랜치에 커밋(문서 수정 + HTML + 티켓).
 
 **구현(2단계) 모드** (사람이 티켓 검수 후 재트리거):
 - `Agent`(subagent_type: `dev`)로 그 브랜치의 **확정 티켓을 구현**시킨다(티켓 의존 순서, BE 먼저 → FE). 끝나면 브랜치 커밋 + 보고.

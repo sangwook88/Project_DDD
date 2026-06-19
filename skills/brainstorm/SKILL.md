@@ -5,7 +5,7 @@ description: 막연한 아이디어를 소크라테스식 대화로 끌어내 �
 
 # brainstorm — 소크라테스식 기획 (기획 전단 1단계)
 
-막연한 아이디어를 *값을 짓지 않고* 대화로 끌어내 **설계 브리프** 한 장으로 빚는다. 구현·도메인 분할은 안 한다 — "무엇을 / 왜 / 무엇이 필요한지"까지. 규약: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md). 산출: `docs/brainstorming/YYYY-MM-DD-<topic>-brief.md`.
+막연한 아이디어를 *값을 짓지 않고* 대화로 끌어내 **설계 브리프** 한 장으로 빚는다. 구현·도메인 분할은 안 한다 — "무엇을 / 왜 / 무엇이 필요한지"까지. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/brainstorming/YYYY-MM-DD-<topic>-brief.md`.
 
 ## 절대 규칙
 1. **값 생성 금지.** 수치·수량·비율·방식·규칙·계산식·enum 값 의미를 짓지 않는다. "예를 들면 3쯤" 같은 예시 수치도 금지. "무엇이 필요한지" + `[입력 필요]`까지만.
