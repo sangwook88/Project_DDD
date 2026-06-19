@@ -41,17 +41,32 @@ docs/
 
 ## 설치
 
-`~/.claude`에 에이전트 5종 + 스킬 12종 + 템플릿/스크립트 번들을 깔아주는 npx 한 줄:
+에이전트 5종 + 스킬 12종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
+
+### 전역 — 모든 프로젝트에서 사용 (기본)
 
 ```bash
 npx github:lsc892/Project_DDD
 ```
 
-- 특정 프로젝트에만 깔려면: `npx github:lsc892/Project_DDD --project .`
-- 미리보기 `--dry-run` · 제거 `--uninstall`
+`~/.claude`에 설치되어 **어느 폴더에서 Claude Code를 켜든** `desk`·`intake`·`build` … 가 뜹니다. 실행한 프로젝트 폴더에는 아무 파일도 만들지 않습니다 — 정상입니다(산출물 `docs/`·`tickets/` 등은 *스킬을 쓸 때* 그 프로젝트에 생성됩니다).
+
+### 프로젝트 한정 — 그 프로젝트에서만 적용
+
+특정 프로젝트에서만 에이전트·스킬을 쓰려면 그 프로젝트 폴더 안에서:
+
+```bash
+npx github:lsc892/Project_DDD --project .
+```
+
+`<project>/.claude/` 에 설치되어, **그 프로젝트를 열었을 때만** 에이전트·스킬이 뜹니다(전역은 건드리지 않음). 팀 레포에 커밋해 함께 쓰거나, 전역을 깔지 않고 프로젝트별로 격리할 때 유용합니다. 경로를 직접 줘도 됩니다: `--project ../다른프로젝트`.
+
+### 기타
+
+- 미리보기 `--dry-run` · 제거 `--uninstall` (둘 다 `--project` 와 조합 가능)
 - 로컬 클론이면: `node bin/install.mjs`
 
-Claude Code를 재시작하면 `desk`·`intake`·`build` … 가 뜹니다.
+설치 후 Claude Code를 재시작하면 적용됩니다.
 
 ## 사용법
 
