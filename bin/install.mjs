@@ -12,7 +12,7 @@
 
 import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { homedir } from "node:os";
-import { join, dirname, resolve } from "node:path";
+import { join, dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SRC = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -87,9 +87,18 @@ function doInstall() {
     mkdirSync(BUNDLE, { recursive: true });
     cpSync(SRC, BUNDLE, {
       recursive: true,
-      filter: (s) => !s.split(/[\\/]/).some((seg) => SKIP_DIRS.has(seg)),
+      // 필터는 SRC 기준 "상대경로"로 검사한다. npx 캐시 경로(…/node_modules/fe-be-ddd)에
+      // 박힌 node_modules가 복사 루트(rel="")를 걸러내 빈 번들이 깔리는 버그 방지.
+      filter: (s) => {
+        const rel = relative(SRC, s);
+        return !rel.split(/[\\/]/).some((seg) => SKIP_DIRS.has(seg));
+      },
     });
     rewriteMdInPlace(BUNDLE);                       // 번들 내부 .md 토큰도 치환
+    // 조용한 실패(0개 복사) 승격: cpSync는 필터가 루트를 막아도 예외를 안 던진다.
+    if (readdirSync(BUNDLE).length === 0) {
+      throw new Error(`번들 복사 실패: ${BUNDLE} 가 비어있음 (filter가 복사 루트를 막았는지 확인)`);
+    }
   }
   log(`  - 번들  .claude/${BUNDLE_NAME}/  (templates·scripts·docs)`);
 
