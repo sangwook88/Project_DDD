@@ -61,9 +61,11 @@ npx github:lsc892/Project_DDD --project .
 
 `<project>/.claude/` 에 설치되어, **그 프로젝트를 열었을 때만** 에이전트·스킬이 뜹니다(전역은 건드리지 않음). 팀 레포에 커밋해 함께 쓰거나, 전역을 깔지 않고 프로젝트별로 격리할 때 유용합니다. 경로를 직접 줘도 됩니다: `--project ../다른프로젝트`.
 
-### 기타
+### 제거 · 기타
 
-- 미리보기 `--dry-run` · 제거 `--uninstall` (둘 다 `--project` 와 조합 가능)
+- 전역 제거: `npx github:lsc892/Project_DDD --uninstall`
+- **프로젝트 설치는 같은 위치에서 `--uninstall --project .` 로 제거**합니다(설치할 때 `--project`를 줬으면 제거할 때도 줘야 함). 그냥 `--uninstall`만 쓰면 전역을 대상으로 하며, 프로젝트 설치본이 따로 있으면 그 제거 명령을 안내합니다.
+- 미리보기 `--dry-run` (설치·제거 모두, `--project` 와 조합 가능)
 - 로컬 클론이면: `node bin/install.mjs`
 
 설치 후 Claude Code를 재시작하면 적용됩니다.

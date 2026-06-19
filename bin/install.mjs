@@ -75,35 +75,75 @@ function listSkills() {
     .filter((d) => d.isDirectory()).map((d) => d.name);
 }
 
+// 번들이 깔려 있으면(= ${BUNDLE_NAME}/ 존재) 그 루트에 설치본이 있는 것으로 본다.
+function hasInstall(root) {
+  return existsSync(join(root, BUNDLE_NAME));
+}
+
 function doUninstall() {
-  log(`\n  Uninstalling fe-be-ddd from ${claudeRoot}\n`);
-  const targets = [
-    BUNDLE,
-    ...listAgents().map((f) => join(AGENTS_DST, f)),
-    ...listSkills().map((s) => join(SKILLS_DST, s)),
-  ];
-  for (const t of targets) {
-    if (!existsSync(t)) continue;
-    log(`  - removed ${t.replace(claudeRoot, ".claude")}`);
-    if (!DRY) rmSync(t, { recursive: true, force: true });
+  // 제거 대상 루트 결정. --project 가 명시되면 그 루트만, 아니면 전역/현재 프로젝트를 감지한다.
+  // (설치 기본은 전역이지만, cwd 프로젝트에만 깔려 있으면 그걸 지운다 — 설치/제거 비대칭 해소.)
+  const globalRoot = join(homedir(), ".claude");
+  const cwdRoot = resolve(process.cwd(), ".claude");
+  let target;
+  if (PROJECT) {
+    target = claudeRoot;
+  } else {
+    const projectHas = cwdRoot !== globalRoot && hasInstall(cwdRoot);
+    target = (!hasInstall(globalRoot) && projectHas) ? cwdRoot : globalRoot;
   }
-  sweepGhostBaks();          // 옛 버전이 discovery 안에 흘린 *.bak-* 유령까지 청소
-  if (existsSync(BACKUPS)) {
-    log(`  - 삭제 ${BACKUPS.replace(claudeRoot, ".claude")}`);
-    if (!DRY) rmSync(BACKUPS, { recursive: true, force: true });
+
+  log(`\n  Uninstalling fe-be-ddd from ${target}\n`);
+  const removed = removeFrom(target);
+  if (removed === 0) log(`  Nothing to remove — no fe-be-ddd install found here.`);
+
+  // 다른 위치(전역↔프로젝트)에도 설치본이 있으면 그 제거 명령을 안내한다.
+  const other = target === globalRoot ? cwdRoot : globalRoot;
+  if (other !== target && hasInstall(other)) {
+    const cmd = other === globalRoot
+      ? "npx github:lsc892/Project_DDD --uninstall"
+      : "npx github:lsc892/Project_DDD --uninstall --project .";
+    log(`\n  Another install also exists at ${other}`);
+    log(`  Remove it with:  ${cmd}`);
   }
   log(DRY ? "\n  (dry-run — nothing removed)\n" : "\n  Done.\n");
 }
 
-// agents/·skills/ 안에 남은 *.bak-<ts> (옛 버전이 유령 스킬로 만든 백업)을 쓸어낸다.
-function sweepGhostBaks() {
+// 한 루트에서 fe-be-ddd 설치본(번들·평탄 agents/skills·유령백업·백업폴더)을 지운다. 지운 개수 반환.
+function removeFrom(root) {
+  const agentsDst = join(root, "agents");
+  const skillsDst = join(root, "skills");
+  const backups = join(root, `.${BUNDLE_NAME}-backups`);
+  const targets = [
+    join(root, BUNDLE_NAME),
+    ...listAgents().map((f) => join(agentsDst, f)),
+    ...listSkills().map((s) => join(skillsDst, s)),
+  ];
   let n = 0;
-  for (const root of [SKILLS_DST, AGENTS_DST]) {
-    if (!existsSync(root)) continue;
-    for (const e of readdirSync(root)) {
+  for (const t of targets) {
+    if (!existsSync(t)) continue;
+    log(`  - removed ${t.replace(root, ".claude")}`);
+    if (!DRY) rmSync(t, { recursive: true, force: true });
+    n++;
+  }
+  n += sweepGhostBaks(skillsDst, agentsDst, root);
+  if (existsSync(backups)) {
+    log(`  - removed ${backups.replace(root, ".claude")}`);
+    if (!DRY) rmSync(backups, { recursive: true, force: true });
+    n++;
+  }
+  return n;
+}
+
+// agents/·skills/ 안에 남은 *.bak-<ts> (옛 버전이 유령 스킬로 만든 백업)을 쓸어낸다.
+function sweepGhostBaks(skillsDst = SKILLS_DST, agentsDst = AGENTS_DST, root = claudeRoot) {
+  let n = 0;
+  for (const dir of [skillsDst, agentsDst]) {
+    if (!existsSync(dir)) continue;
+    for (const e of readdirSync(dir)) {
       if (!BAK_RE.test(e)) continue;
-      const p = join(root, e);
-      log(`  - cleaned ghost backup ${p.replace(claudeRoot, ".claude")}`);
+      const p = join(dir, e);
+      log(`  - cleaned ghost backup ${p.replace(root, ".claude")}`);
       if (!DRY) rmSync(p, { recursive: true, force: true });
       n++;
     }
