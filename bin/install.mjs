@@ -8,8 +8,8 @@
 //
 // 핵심: ~/.claude/agents·~/.claude/skills 에 놓인 "맨 파일"은 네임스페이스 접두가
 // 붙지 않는다. 다만 스킬/에이전트는 템플릿·스크립트·규약을 ${DDD_ROOT} 토큰으로
-// 참조하므로, 복사하면서 그 토큰을 번들 경로로 치환해 자급자족시킨다(전역 설치는
-// 절대경로, --project 설치는 이식 가능한 프로젝트-상대경로 — BUNDLE_FWD 참고).
+// 참조하므로, 복사하면서 그 토큰을 위치 독립 참조로 치환해 자급자족시킨다(전역은 ~/.claude,
+// --project 는 프로젝트-상대 .claude — 둘 다 사용자 절대경로를 안 박는다. BUNDLE_FWD 참고).
 
 import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync, existsSync, statSync } from "node:fs";
 import { homedir } from "node:os";
@@ -40,18 +40,18 @@ const AGENTS_DST = join(claudeRoot, "agents");
 const SKILLS_DST = join(claudeRoot, "skills");
 
 // 토큰이 치환될 참조 경로. 스킬/에이전트 본문의 ${DDD_ROOT}·${DDD_HOME}는 마크다운
-// 링크와 `pwsh "${DDD_ROOT}/scripts/..."` 명령 양쪽에 쓰이고, 둘 다 에이전트의 작업
-// 디렉터리(= 대상 프로젝트 루트) 기준으로 해석된다. 따라서:
-//   - --project 설치: 프로젝트 루트 기준 상대경로(.claude/…)로 박는다. 머신·사용자
-//     절대경로가 들어가지 않아 .claude/ 를 통째로 커밋·이식해도 깨지지 않는다.
-//   - 전역 설치: 임의 프로젝트 cwd에서 ~/.claude 로의 상대 앵커가 없으므로 절대경로
-//     유지. 전역본은 머신별이고 레포에 커밋되지 않으므로 유출 문제가 없다.
+// 링크(에이전트가 읽음)와 `pwsh "${DDD_ROOT}/scripts/..."` 명령(셸이 실행) 양쪽에 쓰인다.
+// 어느 스코프든 머신·사용자 절대경로(C:/Users/<id>/…)를 박지 않는 위치 독립 참조를 쓴다:
+//   - --project 설치: 프로젝트 루트 기준 상대경로(.claude/…). 에이전트 cwd(= 대상 프로젝트
+//     루트)에서 해석되고, .claude/ 를 통째로 커밋·이식해도 깨지지 않는다.
+//   - 전역 설치: 홈 기준 ~/.claude/… . 셸은 `~`를 펼치고(위치 인자 형태에서 동작) 에이전트는
+//     마크다운 링크의 `~`를 홈으로 해석한다. 사용자명이 박히지 않아 머신 간에도 이식된다.
 const BUNDLE_FWD = PROJECT                          // ${DDD_ROOT} — 번들(리소스) 참조
   ? `.claude/${BUNDLE_NAME}`
-  : BUNDLE.replace(/\\/g, "/");
+  : `~/.claude/${BUNDLE_NAME}`;
 const CLAUDE_FWD = PROJECT                          // ${DDD_HOME} — 디스커버리 루트(.claude) 참조
   ? ".claude"
-  : claudeRoot.replace(/\\/g, "/");
+  : "~/.claude";
 
 // 번들에는 ${DDD_ROOT} 가 실제 참조하는 리소스만 담는다(화이트리스트).
 // agents/·skills/ 는 평탄 사본(.claude/agents·skills)이 정본이므로 번들에서 제외 →
