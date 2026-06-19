@@ -10,7 +10,7 @@
 // 붙지 않는다. 다만 스킬/에이전트는 템플릿·스크립트·규약을 ${DDD_ROOT} 토큰으로
 // 참조하므로, 복사하면서 그 토큰을 번들 절대경로로 치환해 자급자족시킨다.
 
-import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync, existsSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,6 +38,12 @@ const BUNDLE = join(claudeRoot, BUNDLE_NAME);      // ${DDD_ROOT} 대체 (절대
 const AGENTS_DST = join(claudeRoot, "agents");
 const SKILLS_DST = join(claudeRoot, "skills");
 const BUNDLE_FWD = BUNDLE.replace(/\\/g, "/");     // 마크다운/경로용 슬래시 정규화
+
+// 백업은 discovery 루트(agents/·skills/) 밖에 둔다 — 안에 두면 백업이 그대로
+// 스킬로 로드돼 유령이 증식한다. 번들(BUNDLE)도 재설치마다 통째로 지워지므로 피한다.
+const BACKUPS = join(claudeRoot, `.${BUNDLE_NAME}-backups`);
+const RUN_TS = String(Date.now());                 // 한 번의 실행은 같은 타임스탬프 폴더로
+const BAK_RE = /\.bak-\d+$/;                        // 옛 버전이 남긴 유령 백업 이름 패턴
 
 const log = (...a) => console.log(...a);
 const SKIP_DIRS = new Set([".git", ".obsidian", "node_modules"]);
@@ -75,7 +81,28 @@ function doUninstall() {
     log(`  - 삭제 ${t.replace(claudeRoot, ".claude")}`);
     if (!DRY) rmSync(t, { recursive: true, force: true });
   }
+  sweepGhostBaks();          // 옛 버전이 discovery 안에 흘린 *.bak-* 유령까지 청소
+  if (existsSync(BACKUPS)) {
+    log(`  - 삭제 ${BACKUPS.replace(claudeRoot, ".claude")}`);
+    if (!DRY) rmSync(BACKUPS, { recursive: true, force: true });
+  }
   log(DRY ? "\n  (dry-run — 실제 삭제 안 함)\n" : "\n  완료.\n");
+}
+
+// agents/·skills/ 안에 남은 *.bak-<ts> (옛 버전이 유령 스킬로 만든 백업)을 쓸어낸다.
+function sweepGhostBaks() {
+  let n = 0;
+  for (const root of [SKILLS_DST, AGENTS_DST]) {
+    if (!existsSync(root)) continue;
+    for (const e of readdirSync(root)) {
+      if (!BAK_RE.test(e)) continue;
+      const p = join(root, e);
+      log(`  - 유령 백업 정리 ${p.replace(claudeRoot, ".claude")}`);
+      if (!DRY) rmSync(p, { recursive: true, force: true });
+      n++;
+    }
+  }
+  return n;
 }
 
 function doInstall() {
@@ -108,7 +135,7 @@ function doInstall() {
   for (const f of listAgents()) {
     log(`  - agent  .claude/agents/${f}`);
     if (DRY) continue;
-    backupIfForeign(join(AGENTS_DST, f));
+    backupIfForeign(join(AGENTS_DST, f), join(SRC, "agents", f), "agents", f);
     writeFileSync(join(AGENTS_DST, f), rewrite(readFileSync(join(SRC, "agents", f), "utf8")));
   }
 
@@ -116,21 +143,46 @@ function doInstall() {
     log(`  - skill  .claude/skills/${s}/`);
     if (DRY) continue;
     const dst = join(SKILLS_DST, s);
-    backupIfForeign(dst);
+    backupIfForeign(dst, join(SRC, "skills", s), "skills", s);
     rmSync(dst, { recursive: true, force: true });
     cpSync(join(SRC, "skills", s), dst, { recursive: true });
     rewriteMdInPlace(dst);
   }
 
+  // 옛 버전이 discovery 안에 흘린 *.bak-* 유령을 이참에 청소(현재 증식분 회수).
+  if (!DRY) {
+    const swept = sweepGhostBaks();
+    if (swept) log(`\n  - 유령 백업 ${swept}개 정리됨`);
+  }
+
   log(DRY ? "\n  (dry-run — 실제 설치 안 함)\n" : "\n  완료. Claude Code 재시작 후 사용하세요.\n");
 }
 
-// 동명 항목이 이미 있으면 덮어쓰기 전에 한 번 백업한다(.bak-타임스탬프).
-function backupIfForeign(target) {
+// 동명 항목이 이미 있고, 그게 우리 이전 설치본과 다를 때만(= 진짜 외부/수정본)
+// discovery 밖으로 한 번 백업한다. 무변경 재설치는 백업 0개 → 유령 증식 차단.
+function backupIfForeign(target, src, kind, name) {
   if (!existsSync(target)) return;
-  const bak = `${target}.bak-${Date.now()}`;
-  log(`    (기존 항목 백업 → ${bak.replace(claudeRoot, ".claude")})`);
+  if (matchesInstall(target, src)) return;   // 변경 안 된 우리 설치본 → 백업 불필요
+  const bak = join(BACKUPS, RUN_TS, kind, name);
+  log(`    (외부/수정 항목 백업 → ${bak.replace(claudeRoot, ".claude")})`);
+  mkdirSync(dirname(bak), { recursive: true });
   cpSync(target, bak, { recursive: true });
+}
+
+// target 이 "이번에 설치할 내용"과 바이트 단위로 같은가? (.md 는 ${DDD_ROOT} 치환 후 비교)
+function matchesInstall(target, src) {
+  const sStat = statSync(src), tStat = statSync(target);
+  if (sStat.isDirectory() !== tStat.isDirectory()) return false;
+  if (!sStat.isDirectory()) {
+    const want = src.endsWith(".md")
+      ? Buffer.from(rewrite(readFileSync(src, "utf8")))
+      : readFileSync(src);
+    return readFileSync(target).equals(want);
+  }
+  const sNames = readdirSync(src).sort();
+  const tNames = readdirSync(target).sort();
+  if (sNames.length !== tNames.length || sNames.some((n, i) => n !== tNames[i])) return false;
+  return sNames.every((n) => matchesInstall(join(target, n), join(src, n)));
 }
 
 try {
