@@ -5,7 +5,7 @@ description: raw/ 인박스(회의록·신규 기획·리팩토링 문서)를 �
 
 # intake — raw 문서 접수 진입점 (비서)
 
-`raw/` 인박스에 쌓인 문서(회의록·신규 기획·리팩토링 메모)를 **문서 1개당 브랜치 1개**로 갈라 [intake 에이전트](${DDD_ROOT}/agents/intake.md)에 처리시키는 메인 스레드 안내데스크. 스킬은 **스캔·게이트·디스패치**만 하고 분류·구현은 에이전트가 한다. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md).
+`raw/` 인박스에 쌓인 문서(회의록·신규 기획·리팩토링 메모)를 **문서 1개당 브랜치 1개**로 갈라 [intake 에이전트](${DDD_HOME}/agents/intake.md)에 처리시키는 메인 스레드 안내데스크. 스킬은 **스캔·게이트·디스패치**만 하고 분류·구현은 에이전트가 한다. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md).
 
 ## 절대 규칙
 1. **분류·구현을 직접 하지 않는다.** 문서 판정·문서 수정·티켓·코드는 전부 서브에이전트로 인계.

@@ -37,7 +37,13 @@ if (PROJECT) {
 const BUNDLE = join(claudeRoot, BUNDLE_NAME);      // ${DDD_ROOT} 대체 (절대 리소스 루트)
 const AGENTS_DST = join(claudeRoot, "agents");
 const SKILLS_DST = join(claudeRoot, "skills");
-const BUNDLE_FWD = BUNDLE.replace(/\\/g, "/");     // 마크다운/경로용 슬래시 정규화
+const BUNDLE_FWD = BUNDLE.replace(/\\/g, "/");     // ${DDD_ROOT} — 번들(리소스) 절대경로
+const CLAUDE_FWD = claudeRoot.replace(/\\/g, "/"); // ${DDD_HOME} — 디스커버리 루트(.claude)
+
+// 번들에는 ${DDD_ROOT} 가 실제 참조하는 리소스만 담는다(화이트리스트).
+// agents/·skills/ 는 평탄 사본(.claude/agents·skills)이 정본이므로 번들에서 제외 →
+// 상호참조는 ${DDD_HOME}/{agents,skills}/… 로 그 정본을 가리킨다(중복 보관 안 함).
+const BUNDLE_DIRS = ["docs", "scripts", "templates"];
 
 // 백업은 discovery 루트(agents/·skills/) 밖에 둔다 — 안에 두면 백업이 그대로
 // 스킬로 로드돼 유령이 증식한다. 번들(BUNDLE)도 재설치마다 통째로 지워지므로 피한다.
@@ -48,9 +54,9 @@ const BAK_RE = /\.bak-\d+$/;                        // 옛 버전이 남긴 유�
 const log = (...a) => console.log(...a);
 const SKIP_DIRS = new Set([".git", ".obsidian", "node_modules"]);
 
-// 토큰 치환: ${DDD_ROOT} → 번들 절대경로.
+// 토큰 치환: ${DDD_ROOT} → 번들(리소스) 절대경로, ${DDD_HOME} → 디스커버리 루트(.claude).
 function rewrite(text) {
-  return text.split("${DDD_ROOT}").join(BUNDLE_FWD);
+  return text.split("${DDD_ROOT}").join(BUNDLE_FWD).split("${DDD_HOME}").join(CLAUDE_FWD);
 }
 
 function rewriteMdInPlace(dir) {
@@ -108,26 +114,27 @@ function sweepGhostBaks() {
 function doInstall() {
   log(`\n  Installing fe-be-ddd → ${claudeRoot}\n`);
 
-  // 1) 리소스 번들 = ${DDD_ROOT} 대체본. 레포 전체에서 잡파일만 빼고 복사.
+  // 1) 리소스 번들 = ${DDD_ROOT} 대체본. 화이트리스트(docs·scripts·templates)만 복사 —
+  //    agents/·skills/(평탄 사본과 중복), bin/·LICENSE·package.json·README.md(잡파일) 제외.
   if (!DRY) {
     rmSync(BUNDLE, { recursive: true, force: true });
     mkdirSync(BUNDLE, { recursive: true });
-    cpSync(SRC, BUNDLE, {
-      recursive: true,
-      // 필터는 SRC 기준 "상대경로"로 검사한다. npx 캐시 경로(…/node_modules/fe-be-ddd)에
-      // 박힌 node_modules가 복사 루트(rel="")를 걸러내 빈 번들이 깔리는 버그 방지.
-      filter: (s) => {
-        const rel = relative(SRC, s);
-        return !rel.split(/[\\/]/).some((seg) => SKIP_DIRS.has(seg));
-      },
-    });
+    for (const d of BUNDLE_DIRS) {
+      const from = join(SRC, d);
+      if (!existsSync(from)) continue;
+      cpSync(from, join(BUNDLE, d), {
+        recursive: true,
+        // .git/.obsidian/node_modules 같은 잡파일은 하위에서도 제외.
+        filter: (s) => !relative(SRC, s).split(/[\\/]/).some((seg) => SKIP_DIRS.has(seg)),
+      });
+    }
     rewriteMdInPlace(BUNDLE);                       // 번들 내부 .md 토큰도 치환
-    // 조용한 실패(0개 복사) 승격: cpSync는 필터가 루트를 막아도 예외를 안 던진다.
+    // 조용한 실패(0개 복사) 승격: 화이트리스트 디렉터리가 하나도 안 잡히면 빈 번들.
     if (readdirSync(BUNDLE).length === 0) {
-      throw new Error(`bundle copy failed: ${BUNDLE} is empty (check whether the filter blocked the copy root)`);
+      throw new Error(`bundle copy failed: ${BUNDLE} is empty (docs/scripts/templates not found under ${SRC})`);
     }
   }
-  log(`  - bundle .claude/${BUNDLE_NAME}/  (templates·scripts·docs)`);
+  log(`  - bundle .claude/${BUNDLE_NAME}/  (${BUNDLE_DIRS.join("·")})`);
 
   // 2) 디스커버리 사본: 에이전트 → ~/.claude/agents (맨이름), 스킬 → ~/.claude/skills.
   if (!DRY) { mkdirSync(AGENTS_DST, { recursive: true }); mkdirSync(SKILLS_DST, { recursive: true }); }
