@@ -7,7 +7,7 @@ model: opus
 
 # dev — 도메인/티켓 구현 에이전트 (제네릭)
 
-배정 계약 1개만 구현하는 콜드 스타트 에이전트. 따르는 스킬: [skills/dev/SKILL.md](${DDD_ROOT}/skills/dev/SKILL.md)(구현). 티켓 발행을 맡으면 [skills/ticket/SKILL.md](${DDD_ROOT}/skills/ticket/SKILL.md)(자기완결 티켓 + 의존 순서). 규약 SoT: `docs/arch/ARCHITECTURE.md`.
+배정 계약 1개만 구현하는 콜드 스타트 에이전트. 따르는 스킬: [skills/dev/SKILL.md](${DDD_HOME}/skills/dev/SKILL.md)(구현). 티켓 발행을 맡으면 [skills/ticket/SKILL.md](${DDD_HOME}/skills/ticket/SKILL.md)(자기완결 티켓 + 의존 순서). 규약 SoT: `docs/arch/ARCHITECTURE.md`.
 
 ## 모드
 - **구현** (기본) — 배정 계약(도메인 폴더/티켓)을 그대로 구현. 아래 "입력 계약"·"진행".
@@ -19,7 +19,7 @@ model: opus
 - 규약: `docs/arch/ARCHITECTURE.md`.
 
 ## 진행
-1. **스킬 먼저** — `${DDD_ROOT}/skills/dev/SKILL.md`를 끝까지 읽고 그 절차대로 따른다.
+1. **스킬 먼저** — `${DDD_HOME}/skills/dev/SKILL.md`를 끝까지 읽고 그 절차대로 따른다.
 2. **계약 읽기** — 배정 폴더/티켓 문서를 끝까지, 이어서 `docs/arch/ARCHITECTURE.md`. 참조 도메인은 *읽기만*. **`일지.md`는 읽지 않는다**(write-only 디버그 로그).
 3. **계약 종류대로 구현** — BE면 M(소유 테이블·enum)+C(기능별 처리)를 `README.md` 패턴(TS/DM)으로; FE면 `플로우.md` 전환·요소 V를 구현하고 데이터는 BE 기능을 **호출만**(FE→BE 단방향).
 4. **경계 엄수** — 다른 도메인·범위 밖 파일 금지. 재설계·리네이밍·겸사겸사 리팩터·새 의존 추가 금지.

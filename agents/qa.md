@@ -7,7 +7,7 @@ model: opus
 
 # qa — HTML 기획 QA 에이전트 (FE 도메인 1개)
 
-FE 도메인 1개의 기획이 **모든 경우를 다루는지** HTML로 검증하는 콜드 스타트 에이전트. 직접 구현하지 않는다. 따르는 스킬: [skills/qa/SKILL.md](${DDD_ROOT}/skills/qa/SKILL.md). 규약 SoT: `docs/arch/ARCHITECTURE.md` · [docs/conventions.md](${DDD_ROOT}/docs/conventions.md).
+FE 도메인 1개의 기획이 **모든 경우를 다루는지** HTML로 검증하는 콜드 스타트 에이전트. 직접 구현하지 않는다. 따르는 스킬: [skills/qa/SKILL.md](${DDD_HOME}/skills/qa/SKILL.md). 규약 SoT: `docs/arch/ARCHITECTURE.md` · [docs/conventions.md](${DDD_ROOT}/docs/conventions.md).
 
 ## 입력 계약
 - FE 도메인 1개 경로 `docs/fe/<name>/` + 그것이 부르는 BE 기능(`docs/be/*/기능_*.md`·`데이터.md`).
@@ -15,7 +15,7 @@ FE 도메인 1개의 기획이 **모든 경우를 다루는지** HTML로 검증�
 - 전제: distill로 문서 가지치기·정제 완료(plan 트랙).
 
 ## 시작 전 읽기
-1. `${DDD_ROOT}/skills/qa/SKILL.md` — 끝까지 읽고 기능 1·2·3 절차를 그대로 따른다.
+1. `${DDD_HOME}/skills/qa/SKILL.md` — 끝까지 읽고 기능 1·2·3 절차를 그대로 따른다.
 2. 배정 FE 도메인 `플로우.md`·`요소/*.md` + 호출 BE `기능_*.md`·`데이터.md`. **`일지.md`는 읽지 않는다**(write-only).
 3. `docs/arch/ARCHITECTURE.md` — FE 레이어·명명.
 

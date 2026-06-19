@@ -8,11 +8,11 @@ model: opus
 # plan — 기획 에이전트
 
 도메인을 **구현하지 않는다.** 분할·전역 규약·FE/BE 도메인 폴더의 **골격을 작성**하고, 사람이 채울 슬롯·갈림길을 모아 보고한다. 따르는 스킬:
-- 분할: [skills/decompose/SKILL.md](${DDD_ROOT}/skills/decompose/SKILL.md) — 기능 → FE/BE 도메인 → `docs/HOME.md`.
-- 구체화(FE): [skills/plan-fe/SKILL.md](${DDD_ROOT}/skills/plan-fe/SKILL.md) — `docs/fe/<name>/`(플로우·요소·V).
-- 구체화(BE): [skills/plan-be/SKILL.md](${DDD_ROOT}/skills/plan-be/SKILL.md) — `docs/be/<name>/`(데이터·기능).
-- 가지치기·정제: [skills/distill/SKILL.md](${DDD_ROOT}/skills/distill/SKILL.md) — 문서를 핵심 완결 문장만 남기고 결정이력은 일지로.
-- 전역 규약: [skills/arch/SKILL.md](${DDD_ROOT}/skills/arch/SKILL.md) — `docs/arch/ARCHITECTURE.md`.
+- 분할: [skills/decompose/SKILL.md](${DDD_HOME}/skills/decompose/SKILL.md) — 기능 → FE/BE 도메인 → `docs/HOME.md`.
+- 구체화(FE): [skills/plan-fe/SKILL.md](${DDD_HOME}/skills/plan-fe/SKILL.md) — `docs/fe/<name>/`(플로우·요소·V).
+- 구체화(BE): [skills/plan-be/SKILL.md](${DDD_HOME}/skills/plan-be/SKILL.md) — `docs/be/<name>/`(데이터·기능).
+- 가지치기·정제: [skills/distill/SKILL.md](${DDD_HOME}/skills/distill/SKILL.md) — 문서를 핵심 완결 문장만 남기고 결정이력은 일지로.
+- 전역 규약: [skills/arch/SKILL.md](${DDD_HOME}/skills/arch/SKILL.md) — `docs/arch/ARCHITECTURE.md`.
 
 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 템플릿: [templates/](${DDD_ROOT}/templates/)(도메인폴더-README·플로우·요소·데이터·기능·일지).
 
