@@ -70,7 +70,7 @@ function listSkills() {
 }
 
 function doUninstall() {
-  log(`\n  fe-be-ddd 제거 — ${claudeRoot}\n`);
+  log(`\n  Uninstalling fe-be-ddd from ${claudeRoot}\n`);
   const targets = [
     BUNDLE,
     ...listAgents().map((f) => join(AGENTS_DST, f)),
@@ -78,7 +78,7 @@ function doUninstall() {
   ];
   for (const t of targets) {
     if (!existsSync(t)) continue;
-    log(`  - 삭제 ${t.replace(claudeRoot, ".claude")}`);
+    log(`  - removed ${t.replace(claudeRoot, ".claude")}`);
     if (!DRY) rmSync(t, { recursive: true, force: true });
   }
   sweepGhostBaks();          // 옛 버전이 discovery 안에 흘린 *.bak-* 유령까지 청소
@@ -86,7 +86,7 @@ function doUninstall() {
     log(`  - 삭제 ${BACKUPS.replace(claudeRoot, ".claude")}`);
     if (!DRY) rmSync(BACKUPS, { recursive: true, force: true });
   }
-  log(DRY ? "\n  (dry-run — 실제 삭제 안 함)\n" : "\n  완료.\n");
+  log(DRY ? "\n  (dry-run — nothing removed)\n" : "\n  Done.\n");
 }
 
 // agents/·skills/ 안에 남은 *.bak-<ts> (옛 버전이 유령 스킬로 만든 백업)을 쓸어낸다.
@@ -97,7 +97,7 @@ function sweepGhostBaks() {
     for (const e of readdirSync(root)) {
       if (!BAK_RE.test(e)) continue;
       const p = join(root, e);
-      log(`  - 유령 백업 정리 ${p.replace(claudeRoot, ".claude")}`);
+      log(`  - cleaned ghost backup ${p.replace(claudeRoot, ".claude")}`);
       if (!DRY) rmSync(p, { recursive: true, force: true });
       n++;
     }
@@ -106,7 +106,7 @@ function sweepGhostBaks() {
 }
 
 function doInstall() {
-  log(`\n  fe-be-ddd 설치 — ${claudeRoot}  (접두사 없음)\n`);
+  log(`\n  Installing fe-be-ddd → ${claudeRoot}\n`);
 
   // 1) 리소스 번들 = ${DDD_ROOT} 대체본. 레포 전체에서 잡파일만 빼고 복사.
   if (!DRY) {
@@ -124,10 +124,10 @@ function doInstall() {
     rewriteMdInPlace(BUNDLE);                       // 번들 내부 .md 토큰도 치환
     // 조용한 실패(0개 복사) 승격: cpSync는 필터가 루트를 막아도 예외를 안 던진다.
     if (readdirSync(BUNDLE).length === 0) {
-      throw new Error(`번들 복사 실패: ${BUNDLE} 가 비어있음 (filter가 복사 루트를 막았는지 확인)`);
+      throw new Error(`bundle copy failed: ${BUNDLE} is empty (check whether the filter blocked the copy root)`);
     }
   }
-  log(`  - 번들  .claude/${BUNDLE_NAME}/  (templates·scripts·docs)`);
+  log(`  - bundle .claude/${BUNDLE_NAME}/  (templates·scripts·docs)`);
 
   // 2) 디스커버리 사본: 에이전트 → ~/.claude/agents (맨이름), 스킬 → ~/.claude/skills.
   if (!DRY) { mkdirSync(AGENTS_DST, { recursive: true }); mkdirSync(SKILLS_DST, { recursive: true }); }
@@ -152,10 +152,22 @@ function doInstall() {
   // 옛 버전이 discovery 안에 흘린 *.bak-* 유령을 이참에 청소(현재 증식분 회수).
   if (!DRY) {
     const swept = sweepGhostBaks();
-    if (swept) log(`\n  - 유령 백업 ${swept}개 정리됨`);
+    if (swept) log(`\n  - cleaned ${swept} ghost backup(s)`);
   }
 
-  log(DRY ? "\n  (dry-run — 실제 설치 안 함)\n" : "\n  완료. Claude Code 재시작 후 사용하세요.\n");
+  if (DRY) { log("\n  (dry-run — nothing installed)\n"); return; }
+
+  if (PROJECT) {
+    log(`\n  Done — installed to ${claudeRoot}`);
+    log(`  Scope: this project only (active when Claude Code opens this folder).`);
+  } else {
+    log(`\n  Done — installed to ${claudeRoot}`);
+    log(`  Scope: global (available in every project).`);
+    log(`  No files were created in your current folder — that's expected;`);
+    log(`  outputs like docs/ and tickets/ appear when you use a skill.`);
+    log(`  To install into a single project instead:  npx github:lsc892/Project_DDD --project .`);
+  }
+  log(`  Restart Claude Code to apply.\n`);
 }
 
 // 동명 항목이 이미 있고, 그게 우리 이전 설치본과 다를 때만(= 진짜 외부/수정본)
@@ -164,7 +176,7 @@ function backupIfForeign(target, src, kind, name) {
   if (!existsSync(target)) return;
   if (matchesInstall(target, src)) return;   // 변경 안 된 우리 설치본 → 백업 불필요
   const bak = join(BACKUPS, RUN_TS, kind, name);
-  log(`    (외부/수정 항목 백업 → ${bak.replace(claudeRoot, ".claude")})`);
+  log(`    (backed up foreign/modified item → ${bak.replace(claudeRoot, ".claude")})`);
   mkdirSync(dirname(bak), { recursive: true });
   cpSync(target, bak, { recursive: true });
 }
@@ -189,6 +201,6 @@ try {
   if (UNINSTALL) doUninstall();
   else doInstall();
 } catch (e) {
-  console.error("\n  설치 실패:", e.message, "\n");
+  console.error("\n  Install failed:", e.message, "\n");
   process.exit(1);
 }
