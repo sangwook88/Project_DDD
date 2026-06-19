@@ -130,20 +130,22 @@ tickets/<fe|be>/NNNN-*.md 구현 티켓
 raw/<문서>.md             intake 인박스 (처리되면 raw/_done/)
 ```
 
-산출물은 모두 **대상 프로젝트** 작업 디렉토리에, 번들 리소스(`templates/`·`scripts/`)는 `${DDD_ROOT}`로 참조돼 설치 위치와 무관합니다. `일지.md`는 쓰기 전용 결정 로그 — 에이전트는 읽지 않습니다.
+산출물은 모두 **대상 프로젝트** 작업 디렉토리에, 리소스(`templates/`·`scripts/`·`docs/`)는 `${DDD_ROOT}`로 참조됩니다. `일지.md`는 쓰기 전용 결정 로그 — 에이전트는 읽지 않습니다.
 
 ## 설치 — 자세히
 
-`npx`가 파일을 `~/.claude`에 직접 깝니다(`/desk`, `/decompose` …). 레이아웃:
+`npx`가 파일을 `.claude/` 바로 밑에 평탄하게 깝니다(`/desk`, `/decompose` …). 레이아웃:
 
 ```text
-~/.claude/
+.claude/
 ├─ agents/      desk·dev·plan·qa·intake
 ├─ skills/      brainstorm·decompose·… ticket (12종)
-└─ fe-be-ddd/   templates·scripts·docs (${DDD_ROOT}로 참조되는 리소스 번들)
+├─ docs/        conventions (규약)
+├─ templates/   기능·데이터·요소·플로우·sim.html·ticket …
+└─ scripts/     implement.ps1
 ```
 
-설치기가 복사하면서 `${DDD_ROOT}` 토큰을 위 번들 절대경로로 치환하므로 템플릿·스크립트 참조가 설치 위치와 무관하게 동작합니다.
+설치기가 복사하면서 스킬·에이전트 본문의 `${DDD_ROOT}`·`${DDD_HOME}` 토큰을 **위치 독립 참조**로 치환합니다 — `--project` 설치는 프로젝트-상대(`.claude/…`), 전역 설치는 홈-상대(`~/.claude/…`). 머신·사용자 절대경로가 박히지 않아 `.claude/` 를 통째로 커밋·이식해도 깨지지 않습니다.
 
 - **일지 하네스(선택)** — `${DDD_ROOT}/templates/CLAUDE.snippet.md`를 대상 `CLAUDE.md`에 한 번 붙여넣으면 켜집니다(자동 주입 안 함).
 - **업데이트** — `npx github:lsc892/Project_DDD` 재실행(덮어씀). **제거** — 같은 명령에 `--uninstall`.

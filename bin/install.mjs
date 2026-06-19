@@ -35,31 +35,30 @@ if (PROJECT) {
   claudeRoot = join(homedir(), ".claude");
 }
 
-const BUNDLE = join(claudeRoot, BUNDLE_NAME);      // ${DDD_ROOT} 대체 (절대 리소스 루트)
+// 리소스(docs·scripts·templates)는 .claude/ 바로 밑에 평탄하게 깔린다(예전엔 .claude/fe-be-ddd/
+// 아래였다 — 그 래퍼 층을 없앴다). LEGACY_BUNDLE 은 옛 설치본 감지·청소용으로만 남긴다.
+const LEGACY_BUNDLE = join(claudeRoot, BUNDLE_NAME);
 const AGENTS_DST = join(claudeRoot, "agents");
 const SKILLS_DST = join(claudeRoot, "skills");
 
 // 토큰이 치환될 참조 경로. 스킬/에이전트 본문의 ${DDD_ROOT}·${DDD_HOME}는 마크다운
 // 링크(에이전트가 읽음)와 `pwsh "${DDD_ROOT}/scripts/..."` 명령(셸이 실행) 양쪽에 쓰인다.
-// 어느 스코프든 머신·사용자 절대경로(C:/Users/<id>/…)를 박지 않는 위치 독립 참조를 쓴다:
-//   - --project 설치: 프로젝트 루트 기준 상대경로(.claude/…). 에이전트 cwd(= 대상 프로젝트
+// 리소스가 .claude/ 바로 밑으로 평탄화돼 ${DDD_ROOT}(리소스)·${DDD_HOME}(.claude)는 같은 값이
+// 된다. 어느 스코프든 머신·사용자 절대경로(C:/Users/<id>/…)를 박지 않는 위치 독립 참조를 쓴다:
+//   - --project 설치: 프로젝트 루트 기준 상대경로(.claude). 에이전트 cwd(= 대상 프로젝트
 //     루트)에서 해석되고, .claude/ 를 통째로 커밋·이식해도 깨지지 않는다.
-//   - 전역 설치: 홈 기준 ~/.claude/… . 셸은 `~`를 펼치고(위치 인자 형태에서 동작) 에이전트는
+//   - 전역 설치: 홈 기준 ~/.claude . 셸은 `~`를 펼치고(위치 인자 형태에서 동작) 에이전트는
 //     마크다운 링크의 `~`를 홈으로 해석한다. 사용자명이 박히지 않아 머신 간에도 이식된다.
-const BUNDLE_FWD = PROJECT                          // ${DDD_ROOT} — 번들(리소스) 참조
-  ? `.claude/${BUNDLE_NAME}`
-  : `~/.claude/${BUNDLE_NAME}`;
-const CLAUDE_FWD = PROJECT                          // ${DDD_HOME} — 디스커버리 루트(.claude) 참조
-  ? ".claude"
-  : "~/.claude";
+const REF_ROOT = PROJECT ? ".claude" : "~/.claude";
+const BUNDLE_FWD = REF_ROOT;   // ${DDD_ROOT} — 리소스(.claude/{docs,scripts,templates}) 참조
+const CLAUDE_FWD = REF_ROOT;   // ${DDD_HOME} — 디스커버리 루트(.claude) 참조
 
-// 번들에는 ${DDD_ROOT} 가 실제 참조하는 리소스만 담는다(화이트리스트).
-// agents/·skills/ 는 평탄 사본(.claude/agents·skills)이 정본이므로 번들에서 제외 →
-// 상호참조는 ${DDD_HOME}/{agents,skills}/… 로 그 정본을 가리킨다(중복 보관 안 함).
+// .claude/ 바로 밑에 평탄 복사되는 리소스 디렉터리(화이트리스트). agents/·skills/ 는 평탄
+// 사본이 정본이라 제외 — 상호참조는 ${DDD_HOME}/{agents,skills}/… 로 그 정본을 가리킨다.
 const BUNDLE_DIRS = ["docs", "scripts", "templates"];
 
 // 백업은 discovery 루트(agents/·skills/) 밖에 둔다 — 안에 두면 백업이 그대로
-// 스킬로 로드돼 유령이 증식한다. 번들(BUNDLE)도 재설치마다 통째로 지워지므로 피한다.
+// 스킬로 로드돼 유령이 증식한다. 리소스 디렉터리도 재설치마다 우리 파일이 갱신되므로 피한다.
 const BACKUPS = join(claudeRoot, `.${BUNDLE_NAME}-backups`);
 const RUN_TS = String(Date.now());                 // 한 번의 실행은 같은 타임스탬프 폴더로
 const BAK_RE = /\.bak-\d+$/;                        // 옛 버전이 남긴 유령 백업 이름 패턴
@@ -67,8 +66,8 @@ const BAK_RE = /\.bak-\d+$/;                        // 옛 버전이 남긴 유�
 const log = (...a) => console.log(...a);
 const SKIP_DIRS = new Set([".git", ".obsidian", "node_modules"]);
 
-// 토큰 치환: ${DDD_ROOT} → 번들(리소스), ${DDD_HOME} → 디스커버리 루트(.claude). 참조 형태는
-// 설치 스코프에 따라 절대(전역)·프로젝트-상대(--project)로 갈린다 — BUNDLE_FWD/CLAUDE_FWD 참고.
+// 토큰 치환: ${DDD_ROOT}·${DDD_HOME} → 둘 다 디스커버리 루트(.claude). 참조 형태는 설치
+// 스코프에 따라 프로젝트-상대(.claude, --project)·홈-상대(~/.claude, 전역)로 갈린다 — REF_ROOT 참고.
 function rewrite(text) {
   return text.split("${DDD_ROOT}").join(BUNDLE_FWD).split("${DDD_HOME}").join(CLAUDE_FWD);
 }
@@ -89,9 +88,35 @@ function listSkills() {
     .filter((d) => d.isDirectory()).map((d) => d.name);
 }
 
-// 번들이 깔려 있으면(= ${BUNDLE_NAME}/ 존재) 그 루트에 설치본이 있는 것으로 본다.
+// SRC 화이트리스트 디렉터리(docs·scripts·templates) 안 모든 파일을 SRC 기준 상대경로로 나열.
+// 평탄 설치/제거가 "우리 소유 파일"만 건드리도록 — 사용자 동명 폴더(.claude/docs 등)는 보존.
+function listResourceFiles() {
+  const out = [];
+  const walk = (rel) => {
+    const abs = join(SRC, rel);
+    if (!existsSync(abs)) return;
+    for (const e of readdirSync(abs, { withFileTypes: true })) {
+      if (SKIP_DIRS.has(e.name)) continue;
+      const r = join(rel, e.name);
+      if (e.isDirectory()) walk(r);
+      else out.push(r);
+    }
+  };
+  for (const d of BUNDLE_DIRS) walk(d);
+  return out;
+}
+
+// 리소스 제거 후 .claude/{docs,templates,scripts} 가 비었으면 그 디렉터리만 지운다(사용자 파일 보존).
+function pruneEmptyDirs(root) {
+  for (const d of BUNDLE_DIRS) {
+    const p = join(root, d);
+    if (existsSync(p) && readdirSync(p).length === 0) rmSync(p, { recursive: true, force: true });
+  }
+}
+
+// 설치본 감지: 새 평탄 레이아웃의 마커(scripts/implement.ps1) 또는 옛 fe-be-ddd/ 잔재.
 function hasInstall(root) {
-  return existsSync(join(root, BUNDLE_NAME));
+  return existsSync(join(root, "scripts", "implement.ps1")) || existsSync(join(root, BUNDLE_NAME));
 }
 
 function doUninstall() {
@@ -123,18 +148,39 @@ function doUninstall() {
   log(DRY ? "\n  (dry-run — nothing removed)\n" : "\n  Done.\n");
 }
 
-// 한 루트에서 fe-be-ddd 설치본(번들·평탄 agents/skills·유령백업·백업폴더)을 지운다. 지운 개수 반환.
+// 한 루트에서 fe-be-ddd 설치본(평탄 리소스·옛 번들·평탄 agents/skills·유령백업·백업폴더)을
+// 지운다. 리소스는 우리 소유 파일만 골라 지우고 빈 디렉터리만 정리한다(사용자 파일 보존). 지운 개수 반환.
 function removeFrom(root) {
   const agentsDst = join(root, "agents");
   const skillsDst = join(root, "skills");
   const backups = join(root, `.${BUNDLE_NAME}-backups`);
-  const targets = [
-    join(root, BUNDLE_NAME),
+  let n = 0;
+
+  // 1) 평탄 리소스 — 우리가 설치한 파일만 제거 + 빈 디렉터리 정리.
+  let res = 0;
+  for (const rel of listResourceFiles()) {
+    const t = join(root, rel);
+    if (!existsSync(t)) continue;
+    if (!DRY) rmSync(t, { force: true });
+    res++;
+  }
+  if (res) { log(`  - removed ${res} resource file(s) under .claude/{${BUNDLE_DIRS.join(",")}}/`); n += res; }
+  if (!DRY) pruneEmptyDirs(root);
+
+  // 2) 옛 레이아웃(.claude/fe-be-ddd/) 잔재 — 자기소유 폴더라 통째로.
+  const legacy = join(root, BUNDLE_NAME);
+  if (existsSync(legacy)) {
+    log(`  - removed ${legacy.replace(root, ".claude")} (legacy)`);
+    if (!DRY) rmSync(legacy, { recursive: true, force: true });
+    n++;
+  }
+
+  // 3) 평탄 agents/skills 사본.
+  const flat = [
     ...listAgents().map((f) => join(agentsDst, f)),
     ...listSkills().map((s) => join(skillsDst, s)),
   ];
-  let n = 0;
-  for (const t of targets) {
+  for (const t of flat) {
     if (!existsSync(t)) continue;
     log(`  - removed ${t.replace(root, ".claude")}`);
     if (!DRY) rmSync(t, { recursive: true, force: true });
@@ -168,27 +214,30 @@ function sweepGhostBaks(skillsDst = SKILLS_DST, agentsDst = AGENTS_DST, root = c
 function doInstall() {
   log(`\n  Installing fe-be-ddd → ${claudeRoot}\n`);
 
-  // 1) 리소스 번들 = ${DDD_ROOT} 대체본. 화이트리스트(docs·scripts·templates)만 복사 —
-  //    agents/·skills/(평탄 사본과 중복), bin/·LICENSE·package.json·README.md(잡파일) 제외.
+  // 1) 리소스 = ${DDD_ROOT} 대체본. 화이트리스트(docs·scripts·templates)만 .claude/ 바로 밑에
+  //    평탄 복사 — agents/·skills/(평탄 사본과 중복), bin/·LICENSE·package.json·README.md(잡파일) 제외.
   if (!DRY) {
-    rmSync(BUNDLE, { recursive: true, force: true });
-    mkdirSync(BUNDLE, { recursive: true });
+    rmSync(LEGACY_BUNDLE, { recursive: true, force: true });   // 옛 .claude/fe-be-ddd/ 잔재 청소(마이그레이션)
+    for (const rel of listResourceFiles()) {                   // 우리 옛 사본만 비우고 새로 복사(사용자 파일 보존)
+      const t = join(claudeRoot, rel);
+      if (existsSync(t)) rmSync(t, { force: true });
+    }
     for (const d of BUNDLE_DIRS) {
       const from = join(SRC, d);
       if (!existsSync(from)) continue;
-      cpSync(from, join(BUNDLE, d), {
+      cpSync(from, join(claudeRoot, d), {
         recursive: true,
         // .git/.obsidian/node_modules 같은 잡파일은 하위에서도 제외.
         filter: (s) => !relative(SRC, s).split(/[\\/]/).some((seg) => SKIP_DIRS.has(seg)),
       });
+      rewriteMdInPlace(join(claudeRoot, d));                   // 복사된 리소스 .md 토큰 치환
     }
-    rewriteMdInPlace(BUNDLE);                       // 번들 내부 .md 토큰도 치환
-    // 조용한 실패(0개 복사) 승격: 화이트리스트 디렉터리가 하나도 안 잡히면 빈 번들.
-    if (readdirSync(BUNDLE).length === 0) {
-      throw new Error(`bundle copy failed: ${BUNDLE} is empty (docs/scripts/templates not found under ${SRC})`);
+    // 조용한 실패(0개 복사) 승격: 화이트리스트 디렉터리가 하나도 안 잡히면 빈 설치.
+    if (!BUNDLE_DIRS.some((d) => existsSync(join(claudeRoot, d)))) {
+      throw new Error(`resource copy failed: docs/scripts/templates not found under ${SRC}`);
     }
   }
-  log(`  - bundle .claude/${BUNDLE_NAME}/  (${BUNDLE_DIRS.join("·")})`);
+  log(`  - resources .claude/{${BUNDLE_DIRS.join(",")}}/`);
 
   // 2) 디스커버리 사본: 에이전트 → ~/.claude/agents (맨이름), 스킬 → ~/.claude/skills.
   if (!DRY) { mkdirSync(AGENTS_DST, { recursive: true }); mkdirSync(SKILLS_DST, { recursive: true }); }
