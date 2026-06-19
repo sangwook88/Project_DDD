@@ -106,12 +106,25 @@ function listResourceFiles() {
   return out;
 }
 
-// 리소스 제거 후 .claude/{docs,templates,scripts} 가 비었으면 그 디렉터리만 지운다(사용자 파일 보존).
-function pruneEmptyDirs(root) {
-  for (const d of BUNDLE_DIRS) {
-    const p = join(root, d);
-    if (existsSync(p) && readdirSync(p).length === 0) rmSync(p, { recursive: true, force: true });
+// 디렉터리가 존재하고 비어 있으면 지운다(사용자 파일이 있으면 보존). 지웠으면 true.
+function rmDirIfEmpty(p) {
+  if (!existsSync(p) || statSync(p).isDirectory() === false || readdirSync(p).length !== 0) return false;
+  if (!DRY) rmSync(p, { recursive: true, force: true });
+  return true;
+}
+
+// p 아래 빈 디렉터리를 bottom-up 으로 모두 지우고, 마지막에 p 자신도 비었으면 지운다(사용자 파일 보존).
+function pruneEmptyTree(p) {
+  if (!existsSync(p) || statSync(p).isDirectory() === false) return;
+  for (const e of readdirSync(p, { withFileTypes: true })) {
+    if (e.isDirectory()) pruneEmptyTree(join(p, e.name));
   }
+  rmDirIfEmpty(p);
+}
+
+// 리소스 제거 후 .claude/{docs,templates,scripts} 에 남은 빈 디렉터리를 정리한다(사용자 파일 보존).
+function pruneEmptyDirs(root) {
+  for (const d of BUNDLE_DIRS) pruneEmptyTree(join(root, d));
 }
 
 // 설치본 감지: 새 평탄 레이아웃의 마커(scripts/implement.ps1) 또는 옛 fe-be-ddd/ 잔재.
@@ -192,6 +205,14 @@ function removeFrom(root) {
     if (!DRY) rmSync(backups, { recursive: true, force: true });
     n++;
   }
+
+  // 우리 항목을 모두 걷어낸 뒤 비게 된 디렉터리 정리(사용자 파일이 남아 있으면 보존).
+  // agents/·skills/ 는 우리 평탄 사본만 지웠으니, 비었다면 우리만 쓰던 것 → 껍데기 제거.
+  // 마지막으로 .claude 루트도 통째로 비었으면 함께 지운다.
+  for (const p of [agentsDst, skillsDst]) {
+    if (rmDirIfEmpty(p)) log(`  - removed ${p.replace(root, ".claude")} (empty)`);
+  }
+  if (rmDirIfEmpty(root)) log(`  - removed ${root} (empty)`);
   return n;
 }
 
