@@ -8,7 +8,8 @@
 //
 // 핵심: ~/.claude/agents·~/.claude/skills 에 놓인 "맨 파일"은 네임스페이스 접두가
 // 붙지 않는다. 다만 스킬/에이전트는 템플릿·스크립트·규약을 ${DDD_ROOT} 토큰으로
-// 참조하므로, 복사하면서 그 토큰을 번들 절대경로로 치환해 자급자족시킨다.
+// 참조하므로, 복사하면서 그 토큰을 번들 경로로 치환해 자급자족시킨다(전역 설치는
+// 절대경로, --project 설치는 이식 가능한 프로젝트-상대경로 — BUNDLE_FWD 참고).
 
 import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync, existsSync, statSync } from "node:fs";
 import { homedir } from "node:os";
@@ -37,8 +38,20 @@ if (PROJECT) {
 const BUNDLE = join(claudeRoot, BUNDLE_NAME);      // ${DDD_ROOT} 대체 (절대 리소스 루트)
 const AGENTS_DST = join(claudeRoot, "agents");
 const SKILLS_DST = join(claudeRoot, "skills");
-const BUNDLE_FWD = BUNDLE.replace(/\\/g, "/");     // ${DDD_ROOT} — 번들(리소스) 절대경로
-const CLAUDE_FWD = claudeRoot.replace(/\\/g, "/"); // ${DDD_HOME} — 디스커버리 루트(.claude)
+
+// 토큰이 치환될 참조 경로. 스킬/에이전트 본문의 ${DDD_ROOT}·${DDD_HOME}는 마크다운
+// 링크와 `pwsh "${DDD_ROOT}/scripts/..."` 명령 양쪽에 쓰이고, 둘 다 에이전트의 작업
+// 디렉터리(= 대상 프로젝트 루트) 기준으로 해석된다. 따라서:
+//   - --project 설치: 프로젝트 루트 기준 상대경로(.claude/…)로 박는다. 머신·사용자
+//     절대경로가 들어가지 않아 .claude/ 를 통째로 커밋·이식해도 깨지지 않는다.
+//   - 전역 설치: 임의 프로젝트 cwd에서 ~/.claude 로의 상대 앵커가 없으므로 절대경로
+//     유지. 전역본은 머신별이고 레포에 커밋되지 않으므로 유출 문제가 없다.
+const BUNDLE_FWD = PROJECT                          // ${DDD_ROOT} — 번들(리소스) 참조
+  ? `.claude/${BUNDLE_NAME}`
+  : BUNDLE.replace(/\\/g, "/");
+const CLAUDE_FWD = PROJECT                          // ${DDD_HOME} — 디스커버리 루트(.claude) 참조
+  ? ".claude"
+  : claudeRoot.replace(/\\/g, "/");
 
 // 번들에는 ${DDD_ROOT} 가 실제 참조하는 리소스만 담는다(화이트리스트).
 // agents/·skills/ 는 평탄 사본(.claude/agents·skills)이 정본이므로 번들에서 제외 →
@@ -54,7 +67,8 @@ const BAK_RE = /\.bak-\d+$/;                        // 옛 버전이 남긴 유�
 const log = (...a) => console.log(...a);
 const SKIP_DIRS = new Set([".git", ".obsidian", "node_modules"]);
 
-// 토큰 치환: ${DDD_ROOT} → 번들(리소스) 절대경로, ${DDD_HOME} → 디스커버리 루트(.claude).
+// 토큰 치환: ${DDD_ROOT} → 번들(리소스), ${DDD_HOME} → 디스커버리 루트(.claude). 참조 형태는
+// 설치 스코프에 따라 절대(전역)·프로젝트-상대(--project)로 갈린다 — BUNDLE_FWD/CLAUDE_FWD 참고.
 function rewrite(text) {
   return text.split("${DDD_ROOT}").join(BUNDLE_FWD).split("${DDD_HOME}").join(CLAUDE_FWD);
 }
