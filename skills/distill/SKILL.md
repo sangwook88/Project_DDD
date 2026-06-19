@@ -5,7 +5,7 @@ description: plan-be/fe가 사람에게서 끌어낸 도메인 문서(요소/기
 
 # distill — 가지치기·정제 (기획 전단 4단계)
 
-plan-be/fe가 사람에게서 끌어낸 도메인 문서를 *가지치기*해 핵심 완결 문장만 남기고 애매한 표현을 명확히 정제한다([slim-agent](https://gist.github.com/lsc892/6a0f63f565162fcf266f775643439ca9)를 도메인 문서에 적용). 입력 단위 = 도메인 폴더의 문서 한 개(FE `요소/<노드>.md` / BE `기능_<name>.md`·`데이터.md`). 전제: [plan-fe](../plan-fe/SKILL.md)/[plan-be](../plan-be/SKILL.md)가 구체값까지 캐물어 채움 + 사람이 슬롯 채움. 규약: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md).
+plan-be/fe가 사람에게서 끌어낸 도메인 문서를 *가지치기*해 핵심 완결 문장만 남기고 애매한 표현을 명확히 정제한다([slim-agent](https://gist.github.com/lsc892/6a0f63f565162fcf266f775643439ca9)를 도메인 문서에 적용). 입력 단위 = 도메인 폴더의 문서 한 개(FE `요소/<노드>.md` / BE `기능_<name>.md`·`데이터.md`). 전제: [plan-fe](../plan-fe/SKILL.md)/[plan-be](../plan-be/SKILL.md)가 구체값까지 캐물어 채움 + 사람이 슬롯 채움. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md).
 
 > 군더더기: "이 기능은 사용자의 요청을 받아 처리한 다음 그 결과를 적절히 가공해 반환하는 역할을 담당한다."
 > 가지치기: "요청에 `userId·기간`이 오면 그 기간의 주문을 조회해 `[입력 필요: 정렬 기준]`으로 정렬해 반환한다."

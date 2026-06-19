@@ -10,7 +10,7 @@ description: 도메인 폴더(docs/be/<name>/ 또는 docs/fe/<name>/) 또는 티
 - FE 도메인 폴더 `docs/fe/<name>/` (플로우.md + 요소/<노드>.md=V)
 - 티켓 `tickets/<be|fe>/NNNN-*.md`
 
-**계약 자체가 BE(M·C)인지 FE(플로우·V)인지 선언하므로 트랙별 에이전트를 따로 두지 않는다.** 규약 SoT: `docs/arch/ARCHITECTURE.md`. 공통 구현 경계: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md) §구현 경계.
+**계약 자체가 BE(M·C)인지 FE(플로우·V)인지 선언하므로 트랙별 에이전트를 따로 두지 않는다.** 규약 SoT: `docs/arch/ARCHITECTURE.md`. 공통 구현 경계: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md) §구현 경계.
 
 ## 시작 전 읽기
 1. 배정 계약 — 도메인 폴더면 그 안의 `README.md` + (`데이터.md`+`기능_*.md` | `플로우.md`+`요소/*.md`) 전부; 티켓이면 티켓 1장.

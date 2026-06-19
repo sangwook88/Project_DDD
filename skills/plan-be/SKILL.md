@@ -5,7 +5,7 @@ description: BE 도메인 1개의 데이터(M)와 기능(C)을 사람과 끌어�
 
 # plan-be — BE 도메인 명세 (기획 전단 3단계, BE 축)
 
-BE 도메인의 *데이터(M) + 기능(C)*을 끌어낸다. 짝: [plan-fe](../plan-fe/SKILL.md)(FE 플로우+V). 전제: [decompose](../decompose/SKILL.md)로 HOME 확정. 규약: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md). 산출: `docs/be/<name>/`.
+BE 도메인의 *데이터(M) + 기능(C)*을 끌어낸다. 짝: [plan-fe](../plan-fe/SKILL.md)(FE 플로우+V). 전제: [decompose](../decompose/SKILL.md)로 HOME 확정. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/be/<name>/`.
 
 ## 경계 (절대 규칙)
 - BE 도메인 = **데이터(M) + 기능(C)** 만. 플로우 순서·화면·연출(V) 금지 — 그건 FE. 기능 문서는 "무슨 데이터를 읽고 어떻게 처리하나"만(언제 부르나는 FE가 정함).
@@ -24,7 +24,7 @@ BE 도메인의 *데이터(M) + 기능(C)*을 끌어낸다. 짝: [plan-fe](../pl
 2. **맥락** — `CONTEXT.md`·인접 README·이 도메인을 호출하는 FE 요소 문서로 기대 기능 추림. (`일지.md`는 읽지 않는다 — write-only.)
 3. **데이터·구체화 브레인스토밍** — 소유 테이블/스키마/enum을 한 번에 하나씩(식별·속성·관계). **추상·모호한 규칙("적당히 검증", "필요한 만큼")은 구체값을 캐묻는다**(수치·범위·계산식·enum 의미). 값은 사람이, AI는 [입력 필요]·질문만.
 4. **기능 분리** — 큰 기능은 기능마다 1문서(`기능_<name>.md`, 한국어 파일명).
-5. **골격 생성** — `${CLAUDE_PLUGIN_ROOT}/templates/`의 도메인폴더-README·데이터·기능·일지를 복사·토큰 치환(기울임 안내문 유지).
+5. **골격 생성** — `${DDD_ROOT}/templates/`의 도메인폴더-README·데이터·기능·일지를 복사·토큰 치환(기울임 안내문 유지).
 6. **일지 기록** — 도메인 신설 항목 1개 + `현재 상태 요약` 갱신.
 
 ## 산출

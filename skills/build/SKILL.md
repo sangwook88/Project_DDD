@@ -9,14 +9,14 @@ description: 구현 단계 진입점. 구체화된 FE/BE 도메인 폴더(docs/f
 
 ## 흐름
 1. **빠른 게이트** — `docs/HOME.md`·`docs/fe/*/`·`docs/be/*/`를 훑어 `[입력 필요]` 슬롯이 남은 도메인이 있으면 짚고, 사람에게 채울지(→ plan 기획 트랙) 그대로 진행할지 확인한다. 참조 그래프에 순환이 보이면 멈추고 decompose로 경계 재검토를 안내한다.
-2. **오케스트레이터 위임** — `Agent`(subagent_type: `desk` — 플러그인 설치 시 `fe-be-ddd:desk`)를 띄워 분류·wave 편성·디스패치를 맡긴다. desk가:
+2. **오케스트레이터 위임** — `Agent`(subagent_type: `desk`)를 띄워 분류·wave 편성·디스패치를 맡긴다. desk가:
    - 도메인을 **기획 → plan / 구현(BE·FE) → dev** 트랙으로 분류(계약이 BE/FE를 선언하므로 구현 에이전트는 한 종류),
    - 참조 그래프로 wave를 묶어(BE 먼저 → FE) 역할 에이전트를 병렬 디스패치,
    - wave 마감마다 도메인 폴더 상태·`일지.md`·HOME 표를 갱신한다(일지는 쓰기만).
 3. **대안 백엔드(헤드리스)** — Agent 병렬 대신 도메인을 통째로 헤드리스 엔진에 맡기려면 도메인별로 안내(직접 실행 금지 — 검수 게이트 보존):
    ```
-   pwsh "${CLAUDE_PLUGIN_ROOT}/scripts/implement.ps1" -Side be -Domain <name>
-   pwsh "${CLAUDE_PLUGIN_ROOT}/scripts/implement.ps1" -Side fe -Domain <name>
+   pwsh "${DDD_ROOT}/scripts/implement.ps1" -Side be -Domain <name>
+   pwsh "${DDD_ROOT}/scripts/implement.ps1" -Side fe -Domain <name>
    ```
 
 ## 종료

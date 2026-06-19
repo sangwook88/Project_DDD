@@ -5,7 +5,7 @@ description: raw/ 인박스(회의록·신규 기획·리팩토링 문서)를 �
 
 # intake — raw 문서 접수 진입점 (비서)
 
-`raw/` 인박스에 쌓인 문서(회의록·신규 기획·리팩토링 메모)를 **문서 1개당 브랜치 1개**로 갈라 [intake 에이전트](${CLAUDE_PLUGIN_ROOT}/agents/intake.md)에 처리시키는 메인 스레드 안내데스크. 스킬은 **스캔·게이트·디스패치**만 하고 분류·구현은 에이전트가 한다. 규약: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md).
+`raw/` 인박스에 쌓인 문서(회의록·신규 기획·리팩토링 메모)를 **문서 1개당 브랜치 1개**로 갈라 [intake 에이전트](${DDD_ROOT}/agents/intake.md)에 처리시키는 메인 스레드 안내데스크. 스킬은 **스캔·게이트·디스패치**만 하고 분류·구현은 에이전트가 한다. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md).
 
 ## 절대 규칙
 1. **분류·구현을 직접 하지 않는다.** 문서 판정·문서 수정·티켓·코드는 전부 서브에이전트로 인계.
@@ -26,7 +26,7 @@ description: raw/ 인박스(회의록·신규 기획·리팩토링 문서)를 �
 
 ## 접수(1단계) 디스패치
 1. **목록·게이트** — 미처리 `raw/*.md`를 한 줄 요약으로 보여주고 어떤 걸 처리할지 사람에게 확인(전체/일부).
-2. **문서마다 격리 디스패치** — 고른 문서 각각에 대해 `Agent`(subagent_type: `intake` — 플러그인 설치 시 `fe-be-ddd:intake`, `isolation: "worktree"`)를 띄운다. 서로 독립이므로 한 메시지에서 병렬 가능. 각 에이전트에 넘긴다:
+2. **문서마다 격리 디스패치** — 고른 문서 각각에 대해 `Agent`(subagent_type: `intake`, `isolation: "worktree"`)를 띄운다. 서로 독립이므로 한 메시지에서 병렬 가능. 각 에이전트에 넘긴다:
    - 배정 raw 문서 경로 1개 + 모드 = 접수,
    - "규약 SoT = docs/arch/ARCHITECTURE.md", 경계 엄수·값 생성 금지.
    - 각 worktree 브랜치는 `intake/<doc-slug>` 명명을 권장(에이전트 커밋이 그 브랜치에 남음).

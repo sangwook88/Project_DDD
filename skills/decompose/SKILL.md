@@ -5,7 +5,7 @@ description: 브레인스토밍 설계 브리프·막연한 아이디어·기존
 
 # decompose — FE/BE 도메인 분할 확정 (기획 전단 2단계)
 
-기능을 **FE 도메인**과 **BE 도메인**으로 가른다. 한 도메인이 둘을 다 짊어지지 않는다(수직 도메인 금지). AI가 제안하고 **사람이 확정**한다. 전제: [brainstorm](../brainstorm/SKILL.md) 설계 브리프(또는 막연한 아이디어). 규약: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md). 산출: `docs/HOME.md`.
+기능을 **FE 도메인**과 **BE 도메인**으로 가른다. 한 도메인이 둘을 다 짊어지지 않는다(수직 도메인 금지). AI가 제안하고 **사람이 확정**한다. 전제: [brainstorm](../brainstorm/SKILL.md) 설계 브리프(또는 막연한 아이디어). 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/HOME.md`.
 
 ## 절대 규칙
 1. **값 생성 금지.** 수치·규칙·계산식을 짓지 않는다. 도메인 *경계와 책임*만 가른다.

@@ -5,7 +5,7 @@ description: QA와 아키텍처가 끝난 도메인을 콜드 스타트로 구�
 
 # ticket — 구현 티켓 + 의존 플로우 (기획 전단 7단계, 종료)
 
-도메인을 자기완결 티켓으로 그릴하고 의존 순서를 그린다. 전제: [qa](../qa/SKILL.md) 통과 + [arch](../arch/SKILL.md)로 `docs/arch/ARCHITECTURE.md` 확정. 규약: [docs/conventions.md](${CLAUDE_PLUGIN_ROOT}/docs/conventions.md). 산출: `tickets/<fe|be>/NNNN-<slug>.md`.
+도메인을 자기완결 티켓으로 그릴하고 의존 순서를 그린다. 전제: [qa](../qa/SKILL.md) 통과 + [arch](../arch/SKILL.md)로 `docs/arch/ARCHITECTURE.md` 확정. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `tickets/<fe|be>/NNNN-<slug>.md`.
 
 구현 엔진은 티켓 밖을 안 건드린다 → **모호하면 구현이 샌다.** 작성 전 그릴로 갈림길을 닫고 한 장에 ①책임 도메인 ②구조(패턴) ③엣지케이스를 못 박는다. **이 스킬은 티켓만 쓴다** — 코드도 엔진 호출도 안 한다(검수 게이트 보존).
 
@@ -32,7 +32,7 @@ ARCHITECTURE §4 패턴 정책의 도메인 기본값(TS/DM)에서 출발. 이 �
 한 패스로 전수 스윕: 경계값(0·음수·최대·빈 컬렉션) / 상태·순서(중복·동시·재진입·잘못된 시점) / 수명(정리 시점) / 통지(늦은 구독·중복 발화) / 데이터 결손(id 미스·행 없음) / 상호작용(가로지름 충돌·순환). 각 케이스를 표로(`케이스 / 기대 동작 / 처리 위치`). QA에서 융합된 분기를 근거로. 모르면 추측 말고 갈림길로.
 
 ## 5. 티켓 작성
-[templates/ticket.md](${CLAUDE_PLUGIN_ROOT}/templates/ticket.md)를 복제해 채운다:
+[templates/ticket.md](${DDD_ROOT}/templates/ticket.md)를 복제해 채운다:
 - 경로: `tickets/<fe|be>/NNNN-<영문-slug>.md` (NNNN = 그 측 폴더의 기존 최대 +1, 4자리).
 - 프런트매터 필수: `id` · `branch`(feat/<slug>) · `base`(기본 main) · `domain`(fe/<name> 또는 be/<name>) · `stage`(M/C/V) · `pattern`(TS/DM, ARCHITECTURE 기준) · `engine`(codex/claude) · `status: ready` · `created`.
 - **자기완결성** — 콜드 에이전트가 이 티켓만 읽고 구현 가능한가? 변경 파일 경로·시그니처·DTO 필드가 구체적. "적절히"·"알아서" 금지.
@@ -46,7 +46,7 @@ ARCHITECTURE §4 패턴 정책의 도메인 기본값(TS/DM)에서 출발. 이 �
 2. 구조 이탈 결정했으면 도메인 `일지` 기록 확인.
 3. 안내 — **티켓 검수 후** 아래로(스킬이 직접 호출하지 않는다):
    ```
-   pwsh "${CLAUDE_PLUGIN_ROOT}/scripts/implement.ps1" -Side be -Ticket tickets/be/NNNN-<slug>.md
-   pwsh "${CLAUDE_PLUGIN_ROOT}/scripts/implement.ps1" -Side fe -Ticket tickets/fe/NNNN-<slug>.md
+   pwsh "${DDD_ROOT}/scripts/implement.ps1" -Side be -Ticket tickets/be/NNNN-<slug>.md
+   pwsh "${DDD_ROOT}/scripts/implement.ps1" -Side fe -Ticket tickets/fe/NNNN-<slug>.md
    ```
    `base`에서 `branch`를 따 `engine`에게 "이 티켓만 구현"시킨다(기존 구현 절반). 검토·커밋·푸시는 사람.
