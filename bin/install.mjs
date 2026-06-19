@@ -122,7 +122,7 @@ function doInstall() {
     rewriteMdInPlace(dst);
   }
 
-  log(DRY ? "\n  (dry-run — 실제 설치 안 함)\n" : "\n  완료. Claude Code 재시작 후 접두 없는 desk·brainstorm·build … 로 노출됩니다.\n");
+  log(DRY ? "\n  (dry-run — 실제 설치 안 함)\n" : "\n  완료. Claude Code 재시작 후 사용하세요.\n");
 }
 
 // 동명 항목이 이미 있으면 덮어쓰기 전에 한 번 백업한다(.bak-타임스탬프).
