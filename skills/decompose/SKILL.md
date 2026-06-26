@@ -5,7 +5,7 @@ description: 브레인스토밍 설계 브리프·막연한 아이디어·기존
 
 # decompose — FE/BE 도메인 분할 확정 (기획 전단 2단계)
 
-기능을 **FE 도메인**과 **BE 도메인**으로 가른다. 한 도메인이 둘을 다 짊어지지 않는다(수직 도메인 금지). AI가 제안하고 **사람이 확정**한다. 전제: [brainstorm](../brainstorm/SKILL.md) 설계 브리프(또는 막연한 아이디어). 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/HOME.md`.
+기능을 **FE 도메인**과 **BE 도메인**으로 가른다. 한 도메인이 둘을 다 짊어지지 않는다(수직 도메인 금지). AI가 제안하고 **사람이 확정**한다. 전제: [roadmap](../roadmap/SKILL.md)이 자른 **현재 타깃 버전** 범위(있으면) + [brainstorm](../brainstorm/SKILL.md) 설계 브리프(또는 막연한 아이디어). 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/HOME.md`.
 
 ## 절대 규칙
 1. **값 생성 금지.** 수치·규칙·계산식을 짓지 않는다. 도메인 *경계와 책임*만 가른다.
@@ -14,10 +14,11 @@ description: 브레인스토밍 설계 브리프·막연한 아이디어·기존
 4. **참조 단방향.** FE → BE(링크 호출). BE는 FE를 모른다. BE→BE 의존도 단방향·비순환.
 
 ## 시작 전 읽기
-1. brainstorm 설계 브리프(`docs/brainstorming/*-brief.md`) — 있으면 입력으로.
-2. `docs/HOME.md` — 기존 도메인 지형(있으면). 없으면 새로 만든다.
-3. `docs/CONTEXT.md` — 용어·공유 개념(있으면).
-4. 코드 현황(가볍게) — 기존 디렉토리·모듈로 이미 선 그어진 경계 파악.
+1. `docs/roadmap.md` — 있으면 **현재 타깃 버전**과 그 버전 *포함 기능*만 분할 대상으로 삼는다(범위 밖 기능은 다음 버전 슬롯 — 도메인으로 가르지 않는다). 없으면 기능 전체가 대상.
+2. brainstorm 설계 브리프(`docs/brainstorming/*-brief.md`) — 있으면 입력으로.
+3. `docs/HOME.md` — 기존 도메인 지형(있으면). 없으면 새로 만든다.
+4. `docs/CONTEXT.md` — 용어·공유 개념(있으면).
+5. 코드 현황(가볍게) — 기존 디렉토리·모듈로 이미 선 그어진 경계 파악.
 
 ## 흐름
 1. **입력 수집** — 브리프/아이디어/문서 경로. 비었으면 "무엇을 만들고 싶으신가요".
