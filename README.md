@@ -10,14 +10,15 @@
 
 ![Tool](https://img.shields.io/badge/Claude%20Code-agents%2Bskills-8A2BE2)
 ![Install](https://img.shields.io/badge/install-npx-cb3837)
-![Skills](https://img.shields.io/badge/skills-12-339933)
+![Skills](https://img.shields.io/badge/skills-13-339933)
 
 ## 흐름
 
 ```text
 아이디어
   -> brainstorm   소크라테스식 질문 -> 설계 브리프
-  -> decompose    기능 -> FE/BE 도메인 분할
+  -> roadmap      핵심 기능 -> 버전(v1→vN) 스코프 분배 + 현재 타깃 버전
+  -> decompose    현재 타깃 버전 -> FE/BE 도메인 분할
   -> plan-fe/be   플로우·표현 / 데이터·기능 끌어내기
   -> distill      핵심 문장만 남기고 결정이력은 일지로
   -> qa           HTML 클릭 플로우 + 7렌즈 누락 -> 융합
@@ -26,7 +27,7 @@
   -> dev          의존 정렬(BE→FE) -> 병렬 구현
 ```
 
-brainstorm만 사람과 대화하고 나머진 알아서 진행됩니다(직접 한 단계만 부르고 싶으면 그 스킬을 호출). 규칙 셋: **FE/BE 2분할** · **참조 FE→BE 단방향** · **기능 추가 = 파일 추가**.
+brainstorm·roadmap만 사람과 대화하고 나머진 알아서 진행됩니다(직접 한 단계만 부르고 싶으면 그 스킬을 호출). 규칙 셋: **FE/BE 2분할** · **참조 FE→BE 단방향** · **기능 추가 = 파일 추가**. 그리고 **버전 게이트** — 모든 하류 단계는 roadmap의 현재 타깃 버전 범위 안에서만 돕니다.
 
 ## 결과물 — 도메인 폴더 한 장
 
@@ -41,7 +42,7 @@ docs/
 
 ## 설치
 
-에이전트 4종 + 스킬 11종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
+에이전트 5종 + 스킬 13종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
 
 ### 전역 — 모든 프로젝트에서 사용 (기본)
 
@@ -85,19 +86,20 @@ npx github:lsc892/Project_DDD --project .
 
 아래는 상세 레퍼런스.
 
-## 기획 전단 파이프라인 (7단계 스킬)
+## 기획 전단 파이프라인 (8단계 스킬)
 
-전부 *값을 짓지 않고* 슬롯으로 비웁니다. 평소엔 자동으로 진행되고, 한 단계만 직접 돌리고 싶을 때 스킬을 부릅니다.
+전부 *값을 짓지 않고* 슬롯으로 비웁니다. 평소엔 자동으로 진행되고, 한 단계만 직접 돌리고 싶을 때 스킬을 부릅니다. ②부터는 roadmap이 잡은 **현재 타깃 버전** 범위 안에서 돕니다.
 
 | 단계 | 스킬 | 산출 |
 |---|---|---|
 | ① 브레인스토밍 | `brainstorm` | `docs/brainstorming/*-brief.md` |
-| ② 도메인 분할 | `decompose` | `docs/HOME.md`(지도 + 참조 그래프) |
-| ③ 구체화 FE/BE | `plan-fe`·`plan-be` | `docs/fe/<name>/`·`docs/be/<name>/` |
-| ④ 가지치기 | `distill` | (도메인 폴더 문서 정제) |
-| ⑤ HTML QA | `qa` | `_qa/<fe>.html` + 누락 분기 in-place 융합 |
-| ⑥ 아키텍처 | `arch` | `docs/arch/ARCHITECTURE.md` |
-| ⑦ 티켓 | `ticket` | `tickets/<fe\|be>/NNNN-*.md` |
+| ② 버전 로드맵 | `roadmap` | `docs/roadmap.md`(v1→vN 스코프 + 현재 타깃 버전) |
+| ③ 도메인 분할 | `decompose` | `docs/HOME.md`(지도 + 참조 그래프) |
+| ④ 구체화 FE/BE | `plan-fe`·`plan-be` | `docs/fe/<name>/`·`docs/be/<name>/` |
+| ⑤ 가지치기 | `distill` | (도메인 폴더 문서 정제) |
+| ⑥ HTML QA | `qa` | `_qa/<fe>.html` + 누락 분기 in-place 융합 |
+| ⑦ 아키텍처 | `arch` | `docs/arch/ARCHITECTURE.md` |
+| ⑧ 티켓 | `ticket` | `tickets/<fe\|be>/NNNN-*.md` |
 
 ## 구현 (티켓·도메인 인계 후)
 
@@ -141,8 +143,8 @@ raw/<문서>.md             intake 인박스 (처리되면 raw/_done/)
 
 ```text
 .claude/
-├─ agents/      dev·plan·qa·intake
-├─ skills/      brainstorm·decompose·… ticket (11종)
+├─ agents/      dev·plan·qa·intake·research
+├─ skills/      brainstorm·roadmap·decompose·… ticket (13종)
 ├─ docs/        conventions (규약)
 ├─ templates/   기능·데이터·요소·플로우·sim.html·ticket …
 └─ scripts/     implement.ps1
