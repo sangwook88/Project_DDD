@@ -23,7 +23,7 @@
   -> qa           HTML 클릭 플로우 + 7렌즈 누락 -> 융합
   -> arch         기술 스택·구조 결정
   -> ticket       자기완결 티켓 -> 구현 인계
-  -> build        wave 편성 -> 병렬 구현
+  -> dev          의존 정렬(BE→FE) -> 병렬 구현
 ```
 
 brainstorm만 사람과 대화하고 나머진 알아서 진행됩니다(직접 한 단계만 부르고 싶으면 그 스킬을 호출). 규칙 셋: **FE/BE 2분할** · **참조 FE→BE 단방향** · **기능 추가 = 파일 추가**.
@@ -41,7 +41,7 @@ docs/
 
 ## 설치
 
-에이전트 5종 + 스킬 12종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
+에이전트 4종 + 스킬 11종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
 
 ### 전역 — 모든 프로젝트에서 사용 (기본)
 
@@ -49,7 +49,7 @@ docs/
 npx github:lsc892/Project_DDD
 ```
 
-`~/.claude`에 설치되어 **어느 폴더에서 Claude Code를 켜든** `desk`·`intake`·`build` … 가 뜹니다. 실행한 프로젝트 폴더에는 아무 파일도 만들지 않습니다 — 정상입니다(산출물 `docs/`·`tickets/` 등은 *스킬을 쓸 때* 그 프로젝트에 생성됩니다).
+`~/.claude`에 설치되어 **어느 폴더에서 Claude Code를 켜든** `desk`·`intake`·`dev` … 가 뜹니다. 실행한 프로젝트 폴더에는 아무 파일도 만들지 않습니다 — 정상입니다(산출물 `docs/`·`tickets/` 등은 *스킬을 쓸 때* 그 프로젝트에 생성됩니다).
 
 ### 프로젝트 한정 — 그 프로젝트에서만 적용
 
@@ -79,7 +79,7 @@ npx github:lsc892/Project_DDD --project .
 /intake   # 운영 중 들어온 문서를 raw/에 떨군 뒤 (변경 자동 반영)
 ```
 
-한 단계만 콕 집어 돌리려면 그 스킬을 직접 부르면 됩니다(`/decompose`·`qa`·`build` 등). 게이트는 사람이 엽니다 — 라우터는 자동 순회하지 않습니다.
+한 단계만 콕 집어 돌리려면 그 스킬을 직접 부르면 됩니다(`/decompose`·`qa`·`dev` 등). 게이트는 사람이 엽니다 — 라우터는 자동 순회하지 않습니다.
 
 ---
 
@@ -101,19 +101,22 @@ npx github:lsc892/Project_DDD --project .
 
 ## 구현 (티켓·도메인 인계 후)
 
-`build`로 들어가면 채워진 BE·FE 도메인을 의존 그래프로 wave 편성해(BE 먼저 → FE) 병렬 구현합니다. 미완(빈 슬롯) 도메인은 구현으로 넘기지 않고 기획으로 되돌립니다. 헤드리스로 돌리려면 `pwsh "${DDD_ROOT}/scripts/implement.ps1" -Side <be|fe> -Domain <name>`.
+`dev`에 구현할 도메인을 넘기면(여러 개면 통째로) 의존 그래프로 BE→FE 정렬해 도메인별 구현 서브에이전트를 병렬 디스패치합니다. 별도 빌드 진입점은 없습니다 — dev가 단일 구현 두뇌입니다. 미완(빈 슬롯) 도메인은 구현으로 넘기지 않고 기획으로 되돌립니다. 헤드리스로 돌리려면 `pwsh "${DDD_ROOT}/scripts/implement.ps1" -Side <be|fe> -Domain <name>`.
 
 ## 변경 접수 (intake) — 운영 중 들어오는 문서
 
-회의록·신규 기획·리팩토링 메모를 `raw/`에 떨구면, `intake`가 문서당 브랜치(worktree)를 파고 트랙을 갈라 알아서 처리합니다.
+회의록·신규 기획·아이디어·리팩토링 메모를 `raw/`에 떨구면, `intake`(종합 창구)가 문서당 브랜치(worktree)를 파고 **문서를 기획 부분·개발 부분으로 갈라** plan·dev에 분배합니다.
 
 ```text
-raw/<문서>.md  ->  /intake (스캔·게이트)  ->  문서당 브랜치에서 자동 처리
-  ① 새 도메인 경계 -> 멈추고 "decompose 하세요" (경계는 사람 게이트)
-  ② 기존 기획 수정 -> 문서 반영 + (FE 플로우면 QA HTML) + 티켓 발행 -> 멈춤
-                      [사람이 티켓·QA 검수] -> 재트리거 시 구현
-  ③ 작은 구현 수정 -> 티켓 발급 + 바로 구현
+raw/<문서>.md  ->  /intake (스캔·게이트)  ->  문서당 브랜치에서 분석·분배
+  새 도메인 경계 -> 멈추고 "decompose 하세요" (경계는 사람 게이트)
+  기획 부분      -> plan이 문서 반영 (+FE 플로우면 QA HTML)
+                    개발 유발 시 "개발 인계 메모" -> dev
+  개발 부분      -> dev가 티켓으로 분해·발행 -> 멈춤
+                    [사람이 티켓 검수·승인] -> dev가 worktree에서 구현
 ```
+
+복합 문서면 intake, 특정 개발/기획이면 `dev`·`plan` 직접 호출, dev/plan이 범위를 넘으면 거꾸로 intake로 올립니다.
 
 브랜치엔 로컬 커밋만 — push·merge는 사람. 처리된 문서는 `raw/_done/`으로. `decompose`가 *맨 처음* 경계를 가른다면, `intake`는 *운영 중* 변경을 위키에 반영·구현으로 라우팅하는 상시 입구입니다.
 
@@ -138,8 +141,8 @@ raw/<문서>.md             intake 인박스 (처리되면 raw/_done/)
 
 ```text
 .claude/
-├─ agents/      desk·dev·plan·qa·intake
-├─ skills/      brainstorm·decompose·… ticket (12종)
+├─ agents/      dev·plan·qa·intake
+├─ skills/      brainstorm·decompose·… ticket (11종)
 ├─ docs/        conventions (규약)
 ├─ templates/   기능·데이터·요소·플로우·sim.html·ticket …
 └─ scripts/     implement.ps1
