@@ -18,8 +18,8 @@
 아이디어
   -> brainstorm   소크라테스식 질문 -> 설계 브리프
   -> roadmap      핵심 기능 -> 버전(v1→vN) 스코프 분배 + 현재 타깃 버전
-  -> decompose    현재 타깃 버전 -> FE/BE 도메인 분할
-  -> plan-fe/be   플로우·표현 / 데이터·기능 끌어내기
+  -> decompose    현재 타깃 버전 -> FE 도메인 분할 + 잠정 BE
+  -> plan-fe→be   FE 플로우·표현 먼저 -> 그 호출에서 BE 데이터·기능 도출 (FE-first)
   -> distill      핵심 문장만 남기고 결정이력은 일지로
   -> qa           HTML 클릭 플로우 + 7렌즈 누락 -> 융합
   -> arch         기술 스택·구조 결정
@@ -27,7 +27,7 @@
   -> dev          의존 정렬(BE→FE) -> 병렬 구현
 ```
 
-brainstorm·roadmap만 사람과 대화하고 나머진 알아서 진행됩니다(직접 한 단계만 부르고 싶으면 그 스킬을 호출). 규칙 셋: **FE/BE 2분할** · **참조 FE→BE 단방향** · **기능 추가 = 파일 추가**. 그리고 **버전 게이트** — 모든 하류 단계는 roadmap의 현재 타깃 버전 범위 안에서만 돕니다.
+brainstorm·roadmap만 사람과 대화하고 나머진 알아서 진행됩니다(직접 한 단계만 부르고 싶으면 그 스킬을 호출). 규칙 셋: **FE/BE 2분할** · **참조 FE→BE 단방향** · **기능 추가 = 파일 추가**. 그리고 **버전 게이트** — 모든 하류 단계는 roadmap의 현재 타깃 버전 범위 안에서만 돕니다. 순서는 두 방향: **기획은 FE-first**(화면 흐름을 먼저 떠올리고 그 호출에서 BE를 도출), **구현은 BE-first**(FE가 부르는 기능이 먼저 있어야 하므로 dev가 BE→FE 의존 정렬).
 
 ## 결과물 — 도메인 폴더 한 장
 
@@ -94,8 +94,8 @@ npx github:lsc892/Project_DDD --project .
 |---|---|---|
 | ① 브레인스토밍 | `brainstorm` | `docs/brainstorming/*-brief.md` |
 | ② 버전 로드맵 | `roadmap` | `docs/roadmap.md`(v1→vN 스코프 + 현재 타깃 버전) |
-| ③ 도메인 분할 | `decompose` | `docs/HOME.md`(지도 + 참조 그래프) |
-| ④ 구체화 FE/BE | `plan-fe`·`plan-be` | `docs/fe/<name>/`·`docs/be/<name>/` |
+| ③ 도메인 분할 | `decompose` | `docs/HOME.md`(FE 지도 + 잠정 BE + 참조 그래프) |
+| ④ 구체화 FE→BE | `plan-fe` → `plan-be` | `docs/fe/<name>/` 먼저 → 그 호출에서 `docs/be/<name>/` 도출 |
 | ⑤ 가지치기 | `distill` | (도메인 폴더 문서 정제) |
 | ⑥ HTML QA | `qa` | `_qa/<fe>.html` + 누락 분기 in-place 융합 |
 | ⑦ 아키텍처 | `arch` | `docs/arch/ARCHITECTURE.md` |
