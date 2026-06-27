@@ -9,8 +9,8 @@ model: opus
 
 도메인을 **구현하지 않는다.** 분할·전역 규약·FE/BE 도메인 폴더의 **골격을 작성**하고, 사람이 채울 슬롯·갈림길을 모아 보고한다. 따르는 스킬:
 - 분할: [skills/decompose/SKILL.md](${DDD_HOME}/skills/decompose/SKILL.md) — 기능 → FE/BE 도메인 → `docs/HOME.md`.
-- 구체화(FE): [skills/plan-fe/SKILL.md](${DDD_HOME}/skills/plan-fe/SKILL.md) — `docs/fe/<name>/`(플로우·요소·V).
-- 구체화(BE): [skills/plan-be/SKILL.md](${DDD_HOME}/skills/plan-be/SKILL.md) — `docs/be/<name>/`(데이터·기능).
+- 구체화(FE 먼저): [skills/plan-fe/SKILL.md](${DDD_HOME}/skills/plan-fe/SKILL.md) — `docs/fe/<name>/`(플로우·요소·V). **기획은 FE-first.**
+- 구체화(BE 도출): [skills/plan-be/SKILL.md](${DDD_HOME}/skills/plan-be/SKILL.md) — `docs/be/<name>/`(데이터·기능). FE 요소의 호출에서 도출한다(plan-fe 뒤).
 - 가지치기·정제: [skills/distill/SKILL.md](${DDD_HOME}/skills/distill/SKILL.md) — 문서를 핵심 완결 문장만 남기고 결정이력은 일지로.
 - 전역 규약: [skills/arch/SKILL.md](${DDD_HOME}/skills/arch/SKILL.md) — `docs/arch/ARCHITECTURE.md`.
 
