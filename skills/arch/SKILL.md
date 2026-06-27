@@ -5,17 +5,17 @@ description: 기획 QA가 끝난 도메인들을 근거로 어떤 기술 스택�
 
 # arch — 기술·구조 아키텍처 결정 (기획 전단 6단계)
 
-기획 QA로 "무엇"이 굳은 뒤, **어떤 기술로 어떤 구조로 지을지**를 트레이드오프로 결정한다. 전제: [qa](../qa/SKILL.md) 통과(도메인 폴더가 완결). 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/arch/ARCHITECTURE.md`. 이 문서가 [ticket](../ticket/SKILL.md)의 구조 근거.
+QA로 "무엇"이 굳은 뒤 **어떤 기술로 어떤 구조로 지을지**를 트레이드오프로 결정한다. 전제: [qa](../qa/SKILL.md) 통과. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/arch/ARCHITECTURE.md` — [ticket](../ticket/SKILL.md)의 구조 근거.
 
 ## 절대 규칙
-1. **트레이드오프로 결정.** 기술·구조는 갈림길로 올려 A/B(/C) 트레이드오프 + 추천 + 시나리오로 사람이 고른다. AI가 단정하지 않는다.
-2. **QA된 기능에 접지.** 스택·패턴 선택을 `docs/fe/*/`·`docs/be/*/`의 실제 기능 복잡도로 정당화한다(막연한 선호 금지).
-3. **코드로 답할 수 있으면 직접 읽는다.** 기존 코드가 있으면 계승 vs 교체를 코드 근거로.
+1. **트레이드오프로 결정.** 기술·구조는 갈림길로 올려 A/B(/C) 트레이드오프 + 추천 + 시나리오로 사람이 고른다(AI 단정 금지).
+2. **QA된 기능에 접지.** 스택·패턴 선택을 `docs/fe/*/`·`docs/be/*/`의 실제 기능 복잡도로 정당화(막연한 선호 금지).
+3. **코드로 답할 수 있으면 직접 읽는다.** 기존 코드 있으면 계승 vs 교체를 코드 근거로.
 4. **한 번에 한 갈림길.** skeptic 기본 — 숨은 가정·실패 모드·기존 코드 충돌 포함.
 
 ## 시작 전 읽기
 1. `docs/arch/ARCHITECTURE.md` — 현재 상태(있으면).
-2. `docs/HOME.md` + `docs/fe/*/`·`docs/be/*/` — FE/BE 도메인 목록·참조 그래프·QA된 기능.
+2. `docs/HOME.md` + `docs/fe/*/`·`docs/be/*/` — 도메인 목록·참조 그래프·QA된 기능.
 3. `docs/CONTEXT.md` — 용어.
 4. 코드 현황 — 빌드·디렉토리·대표 모듈(있으면).
 
