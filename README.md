@@ -17,17 +17,17 @@
 ```text
 아이디어
   -> brainstorm   소크라테스식 질문 -> 설계 브리프
+  -> sketch       저코스트 클릭형 목업 -> 비전 합맞춤 + 브리프 되먹임
   -> roadmap      핵심 기능 -> 버전(v1→vN) 스코프 분배 + 현재 타깃 버전
-  -> decompose    현재 타깃 버전 -> FE 도메인 분할 + 잠정 BE
-  -> plan-fe→be   FE 플로우·표현 먼저 -> 그 호출에서 BE 데이터·기능 도출 (FE-first)
+  -> decompose    sketch 목업 기반 -> FE+BE 도메인 firm 분할 + 참조 그래프
+  -> plan-fe+be   sketch 공유 소스로 코스펙 -> FE 플로우·요소 + 그 호출이 닿는 BE 데이터·기능 (한 패스)
   -> distill      핵심 문장만 남기고 결정이력은 일지로
-  -> qa           HTML 클릭 플로우 + 7렌즈 누락 -> 융합
   -> arch         기술 스택·구조 결정
   -> ticket       자기완결 티켓 -> 구현 인계
   -> dev          의존 정렬(BE→FE) -> 병렬 구현
 ```
 
-brainstorm·roadmap만 사람과 대화하고 나머진 알아서 진행됩니다(직접 한 단계만 부르고 싶으면 그 스킬을 호출). 규칙 셋: **FE/BE 2분할** · **참조 FE→BE 단방향** · **기능 추가 = 파일 추가**. 그리고 **버전 게이트** — 모든 하류 단계는 roadmap의 현재 타깃 버전 범위 안에서만 돕니다. 순서는 두 방향: **기획은 FE-first**(화면 흐름을 먼저 떠올리고 그 호출에서 BE를 도출), **구현은 BE-first**(FE가 부르는 기능이 먼저 있어야 하므로 dev가 BE→FE 의존 정렬).
+brainstorm·sketch·roadmap만 사람과 대화하고 나머진 알아서 진행됩니다(직접 한 단계만 부르고 싶으면 그 스킬을 호출). 규칙 셋: **FE/BE 2분할** · **참조 FE→BE 단방향** · **기능 추가 = 파일 추가**. 그리고 **버전 게이트** — 모든 하류 단계는 roadmap의 현재 타깃 버전 범위 안에서만 돕니다. 순서는 두 방향: **기획은 sketch 기반 FE/BE 코스펙**(목업이 화면을 구체화해 FE·BE를 한 패스에 — sketch가 없으면 FE-first 폴백), **구현은 BE-first**(FE가 부르는 기능이 먼저 있어야 하므로 dev가 BE→FE 의존 정렬).
 
 ## 결과물 — 도메인 폴더 한 장
 
@@ -42,7 +42,7 @@ docs/
 
 ## 설치
 
-에이전트 5종 + 스킬 13종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
+에이전트 4종 + 스킬 13종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
 
 ### 전역 — 모든 프로젝트에서 사용 (기본)
 
@@ -80,7 +80,7 @@ npx github:lsc892/Project_DDD --project .
 /intake   # 운영 중 들어온 문서를 raw/에 떨군 뒤 (변경 자동 반영)
 ```
 
-한 단계만 콕 집어 돌리려면 그 스킬을 직접 부르면 됩니다(`/decompose`·`qa`·`dev` 등). 게이트는 사람이 엽니다 — 라우터는 자동 순회하지 않습니다.
+한 단계만 콕 집어 돌리려면 그 스킬을 직접 부르면 됩니다(`/decompose`·`sketch`·`dev` 등). 게이트는 사람이 엽니다 — 라우터는 자동 순회하지 않습니다.
 
 ---
 
@@ -93,11 +93,11 @@ npx github:lsc892/Project_DDD --project .
 | 단계 | 스킬 | 산출 |
 |---|---|---|
 | ① 브레인스토밍 | `brainstorm` | `docs/brainstorming/*-brief.md` |
-| ② 버전 로드맵 | `roadmap` | `docs/roadmap.md`(v1→vN 스코프 + 현재 타깃 버전) |
-| ③ 도메인 분할 | `decompose` | `docs/HOME.md`(FE 지도 + 잠정 BE + 참조 그래프) |
-| ④ 구체화 FE→BE | `plan-fe` → `plan-be` | `docs/fe/<name>/` 먼저 → 그 호출에서 `docs/be/<name>/` 도출 |
-| ⑤ 가지치기 | `distill` | (도메인 폴더 문서 정제) |
-| ⑥ HTML QA | `qa` | `_qa/<fe>.html` + 누락 분기 in-place 융합 |
+| ② 비전 합맞춤 | `sketch` | `docs/brainstorming/<topic>-sketch.html`(저코스트 목업) + 브리프 되먹임 |
+| ③ 버전 로드맵 | `roadmap` | `docs/roadmap.md`(v1→vN 스코프 + 현재 타깃 버전) |
+| ④ 도메인 분할 | `decompose` | `docs/HOME.md`(sketch 기반 FE+BE firm 분할 + 참조 그래프) |
+| ⑤ 코스펙 FE+BE | `plan-fe` + `plan-be` | sketch 공유 소스로 `docs/fe/<name>/` + `docs/be/<name>/` 한 패스(없으면 FE-first) |
+| ⑥ 가지치기 | `distill` | (도메인 폴더 문서 정제) |
 | ⑦ 아키텍처 | `arch` | `docs/arch/ARCHITECTURE.md` |
 | ⑧ 티켓 | `ticket` | `tickets/<fe\|be>/NNNN-*.md` |
 
@@ -112,7 +112,7 @@ npx github:lsc892/Project_DDD --project .
 ```text
 raw/<문서>.md  ->  /intake (스캔·게이트)  ->  문서당 브랜치에서 분석·분배
   새 도메인 경계 -> 멈추고 "decompose 하세요" (경계는 사람 게이트)
-  기획 부분      -> plan이 문서 반영 (+FE 플로우면 QA HTML)
+  기획 부분      -> plan이 문서 반영 (+비전·플로우 크게 바뀌면 sketch 목업)
                     개발 유발 시 "개발 인계 메모" -> dev
   개발 부분      -> dev가 티켓으로 분해·발행 -> 멈춤
                     [사람이 티켓 검수·승인] -> dev가 worktree에서 구현
@@ -130,7 +130,7 @@ docs/CONTEXT.md           용어·공유 개념
 docs/fe/<name>/           FE 도메인 (플로우.md·요소/<노드>.md·일지.md)
 docs/be/<name>/           BE 도메인 (데이터.md·기능_<name>.md·일지.md)
 docs/arch/ARCHITECTURE.md 전역 규약 + 기술 스택
-_qa/<fe>.html             qa HTML 아티팩트
+docs/brainstorming/*-sketch.html  sketch 비전 목업
 tickets/<fe|be>/NNNN-*.md 구현 티켓
 raw/<문서>.md             intake 인박스 (처리되면 raw/_done/)
 ```
@@ -143,8 +143,8 @@ raw/<문서>.md             intake 인박스 (처리되면 raw/_done/)
 
 ```text
 .claude/
-├─ agents/      dev·plan·qa·intake·research
-├─ skills/      brainstorm·roadmap·decompose·… ticket (13종)
+├─ agents/      dev·plan·intake·research
+├─ skills/      brainstorm·sketch·roadmap·decompose·… ticket (13종)
 ├─ docs/        conventions (규약)
 ├─ templates/   기능·데이터·요소·플로우·sim.html·ticket …
 └─ scripts/     implement.ps1

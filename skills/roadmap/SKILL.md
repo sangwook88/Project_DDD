@@ -5,7 +5,7 @@ description: 브레인스토밍이 뽑은 핵심 기능 목록을 받아 PM처�
 
 # roadmap — 버전 로드맵·스코프 관리 (기획 전단 2단계)
 
-핵심 기능 목록을 받아 *PM처럼* 버전(v1→vN)으로 **스코프를 자른다**. MVP=v1에서 시작해 점증 분배하고, 하류 단계가 "현재 타깃 버전" 경계 안에서만 돌도록 게이트를 건다. 전제: [brainstorm](../brainstorm/SKILL.md) 설계 브리프(핵심 기능 목록). 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/roadmap.md`.
+핵심 기능 목록을 받아 *PM처럼* 버전(v1→vN)으로 **스코프를 자른다**. MVP=v1에서 시작해 점증 분배하고, 하류 단계가 "현재 타깃 버전" 경계 안에서만 돌도록 게이트를 건다. 전제: [brainstorm](../brainstorm/SKILL.md) 설계 브리프(핵심 기능 목록 — [sketch](../sketch/SKILL.md)로 비전을 합맞췄으면 그 갱신본). 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/roadmap.md`.
 
 ## 이 단계가 답하는 것
 - **v1은 어디까지** — 있어야 출시되는 최소 가치.

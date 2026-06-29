@@ -1,52 +1,57 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
-<title>시뮬레이션 — __SCENE__</title>
+<title>UI 데모 — __SCENE__</title>
+<!--
+  sketch 저코스트 목업 스캐폴드. 콜드 서브에이전트가 설계 브리프(docs/brainstorming/*-brief.md)를 읽어
+  핵심 여정을 클릭으로 넘어가는 저충실 화면으로 채운다 — 와이어 수준, 텍스트·데이터는 임시([예시]).
+  규칙:
+   · 화면 1개 = <section class="screen" data-screen="<화면>">. 핵심 요소만 거친 배치(완성도·픽셀 정확도에 시간 쓰지 않는다).
+   · 화면 전이·선택지 = 버튼/요소의 onclick="go('<다음화면>')". 브리프가 함의한 흐름만(없는 동작 생성 금지).
+   · 전역 요소(예: 우하단 FAB)는 .global에 두어 모든 화면에 상시 노출되도록.
+   · 임시 텍스트·데이터는 <span class="ex">[예시] …</span>. 사람이 정할 값은 [입력 필요]로 그대로 노출.
+  아래 두 화면은 형식 예시일 뿐 — 실제 핵심 여정 화면으로 교체한다.
+-->
 <style>
-  body{font:15px/1.6 system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 16px;color:#222}
-  h1{font-size:20px} .step{border:1px solid #ddd;border-radius:8px;padding:12px 16px;margin:10px 0}
-  .step h3{margin:0 0 6px} .state{background:#f6f8fa;padding:8px;border-radius:6px;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:13px}
-  .ex{color:#0a7} .slot{color:#c50;font-weight:600} button{margin:4px 6px 0 0;padding:6px 12px;border:1px solid #888;border-radius:6px;background:#fff;cursor:pointer}
-  button:hover{background:#eef} .gaps{margin-top:28px;border-top:2px solid #333;padding-top:12px}
-  .gaps h2{font-size:17px} textarea{width:100%;min-height:80px;font:13px/1.5 ui-monospace,monospace;margin:6px 0}
-  .hidden{display:none}
+  *{box-sizing:border-box} body{font:15px/1.6 system-ui,sans-serif;margin:0;color:#1a1a1a;background:#f0f1f3}
+  .device{max-width:420px;margin:24px auto;background:#fff;min-height:80vh;position:relative;
+    border-radius:18px;box-shadow:0 6px 30px rgba(0,0,0,.12);overflow:hidden}
+  .screen{display:none;padding:18px} .screen.active{display:block}
+  .ex{color:#0a7} h2{font-size:18px;margin:.2em 0 .6em}
+  .card{border:1px solid #e3e5e8;border-radius:10px;padding:12px;margin:8px 0;cursor:pointer}
+  .card:hover{background:#f6faff;border-color:#9cc4ff}
+  /* 전역 우하단 FAB 예시 — 진짜 위치에 고정 */
+  .fab{position:absolute;right:16px;bottom:16px;width:52px;height:52px;border-radius:50%;
+    border:none;background:#2f6fed;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(47,111,237,.4)}
 </style></head>
 <body>
-<h1>플로우 시뮬레이션 — __SCENE__</h1>
-<p>예시 데이터(<span class="ex">[예시]</span>)로 그린 대로만 워크. 미정 값은 <span class="slot">[입력 필요]</span>.</p>
+<div class="device" id="app">
 
-<div id="steps">
-  <!-- (선택) 시뮬이 노드 순서대로 .step 블록을 채운다. 예시 1개: -->
-  <div class="step" data-node="진입">
-    <h3>1. 진입</h3>
-    <div class="state">입력: <span class="ex">[예시] user=42</span>
-호출: (없음)
-출력: sessionId=<span class="ex">[예시] s_001</span></div>
-    <button onclick="go('노드A')">다음 →</button>
-  </div>
-  <!-- 분기 노드 예시 -->
-  <div class="step hidden" data-node="노드A">
-    <h3>2. 노드A — 분기</h3>
-    <div class="state">조건: amount &gt; <span class="slot">[입력 필요: 임계치]</span></div>
-    <button onclick="go('성공')">초과</button>
-    <button onclick="go('실패')">이하</button>
-  </div>
-</div>
+  <!-- ===== 화면 예시 1 ===== -->
+  <section class="screen active" data-screen="진입">
+    <h2>진입 화면 <span class="ex">[예시]</span></h2>
+    <div class="card" onclick="go('다음화면')">목록 항목 <span class="ex">[예시] 항목 A</span></div>
+    <div class="card" onclick="go('다음화면')">목록 항목 <span class="ex">[예시] 항목 B</span></div>
+  </section>
 
-<div class="gaps">
-  <h2>① FE 플로우에서 놓친 부분</h2>
-  <textarea>- (7렌즈 초안) 노드A: else 분기 미정의 — [입력 필요]
-- </textarea>
-  <h2>② BE 처리에서 미고려 기능</h2>
-  <textarea>- (7렌즈 초안) 임계치 경계값(0·최대) 처리 미정 — [입력 필요]
-- </textarea>
+  <!-- ===== 화면 예시 2 ===== -->
+  <section class="screen" data-screen="다음화면">
+    <h2>다음 화면 <span class="ex">[예시]</span></h2>
+    <div class="card" onclick="go('진입')">← 뒤로</div>
+  </section>
+
+  <!-- ===== 전역 요소(모든 화면 상시) ===== -->
+  <div class="global">
+    <button class="fab" title="챗봇 등 전역 진입" onclick="go('전역대상')">💬</button>
+  </div>
+
 </div>
 
 <script>
-function go(node){
-  document.querySelectorAll('.step').forEach(s=>s.classList.add('hidden'));
-  const t=document.querySelector('.step[data-node="'+node+'"]');
-  if(t) t.classList.remove('hidden');
-  else alert('문서에 없는 전이: '+node+' → 플로우 누락 후보');
+function go(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const t=document.querySelector('.screen[data-screen="'+screen+'"]');
+  if(t){ t.classList.add('active'); document.getElementById('app').scrollTo(0,0); }
+  else alert('플로우에 없는 전이: '+screen+' → 누락 후보(plan-fe로 돌릴 것)');
 }
 </script>
 </body></html>
