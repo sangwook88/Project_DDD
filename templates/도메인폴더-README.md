@@ -3,6 +3,7 @@ kind: <fe | be>           # FE(플로우+표현) / BE(데이터+기능)
 status: not-started       # not-started → in-progress → done
 pattern: <TS | DM>        # BE 도메인만 — arch가 채움. FE는 비움
 depends: []               # 참조하는 도메인 slug (FE→BE, BE→BE)
+# code: src/<slug>        # (선택) 이 도메인 구현 코드 위치. 기본 src/<slug>, 다를 때만 명시 — Tier B 코드 골격 추출 대상
 # --- implement.ps1 헤드리스 백엔드용 (선택, Agent 병렬이면 비워둬도 됨) ---
 branch: feat/<slug>
 base: main
