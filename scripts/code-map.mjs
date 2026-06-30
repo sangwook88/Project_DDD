@@ -105,8 +105,9 @@ function viaFallback(files, rel) {
 
       const keywordLed = LEAD_DEF.test(t) && !CTRL.test(t);
       const beforeParen = t.split("(")[0];
-      // 시그니처처럼 보이되 대입/호출이 아님: ( 앞에 = 없고, 제어문 아님
-      const sigLike = /\)\s*(:[^={]+)?\{\s*$/.test(t) && !/=/.test(beforeParen) && !CTRL.test(t);
+      // 본문 여는 { 로 끝 + (파라미터 목록) 존재 + ( 앞에 대입(=) 없음 + 제어문 아님.
+      // 좁은 정규식 대신 구조로 판정 — 반환 타입에 인라인 {}(Promise<{…}>)가 있어도 잡힌다.
+      const sigLike = t.endsWith("{") && /\([^)]*\)/.test(t) && !/=/.test(beforeParen) && !CTRL.test(t);
 
       if (depth <= 1 && (keywordLed || sigLike) && t.endsWith("{")) {
         out.push("  ".repeat(depth) + t.replace(/\s*\{$/, ""));
