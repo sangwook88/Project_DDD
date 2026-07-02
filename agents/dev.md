@@ -36,6 +36,9 @@ pwsh "${DDD_ROOT}/scripts/implement.ps1" -Side be -Domain <name>
 pwsh "${DDD_ROOT}/scripts/implement.ps1" -Side fe -Domain <name>
 ```
 
+## 참조 그래프 동기화 (새 엣지)
+구현 중 **기존 도메인 사이에 새 연결(엣지)** 이 생기면 — FE→BE 호출이나 BE→BE 의존을 새로 만들면 — **같은 변경에서** `docs/HOME.md ## 참조 그래프` 엣지 + 해당 README `depends:` / 요소 `## 호출하는 기능` 링크를 **함께** 기록한다(셋이 어긋나면 CI `home-check`가 막는다). 연동이 이벤트 구독이면 엣지에 `[event]` 표기(규약 §연동 방식). 단 이건 **기존 도메인 간 엣지**에 한한다 — **새 도메인 경계**가 필요하면 엣지가 아니라 경계 신설이므로 짓지 말고 아래 §범위 초과로 decompose에 올린다.
+
 ## 범위 초과 → intake로 역류
 계약(시그니처·스키마·플로우)을 바꿔야 하거나 새 도메인 경계·기획 변경이 필요하면 **짓지 말고 멈춘다.** "기획 변경/새 경계라 [intake](intake.md)(기획은 plan, 경계는 decompose)로 올려야 한다"고 보고. 직접 호출이 범위를 넘으면 거꾸로 intake로 안내.
 

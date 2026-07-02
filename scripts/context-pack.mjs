@@ -77,11 +77,15 @@ function parseHome(root) {
       if (/^(fe|be)\//.test(slug)) roles[slug] = cols[1] || "";
       continue;
     }
-    // 참조 그래프 행: - fe/a → be/b   # 주석
+    // 참조 그래프 행: - fe/a → be/b  [event]   # 주석
     if (section === "참조 그래프" && line.startsWith("-")) {
       const body = line.replace(/^-\s*/, "").split("#")[0];
       const m = body.split(/→|->/).map((s) => s.trim());
-      if (m.length === 2 && m[0] && m[1]) edges.push({ from: m[0], to: m[1] });
+      if (m.length === 2 && m[0] && m[1]) {
+        const style = /\[\s*event\s*\]/i.test(m[1]) ? "event" : "sync";   // 연동방식(규약 §연동 방식)
+        const to = m[1].replace(/\s*\[[^\]]*\]\s*$/, "").trim();
+        if (to) edges.push({ from: m[0], to, style });
+      }
     }
   }
   return { roles, edges };

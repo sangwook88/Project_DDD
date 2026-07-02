@@ -44,7 +44,9 @@ function parseHome() {
     }
     if (section === "참조 그래프" && line.startsWith("-")) {
       const m = line.replace(/^-\s*/, "").split("#")[0].split(/→|->/).map((s) => s.trim());
-      if (m.length === 2 && m[0] && m[1]) edges.add(key({ from: m[0], to: m[1] }));
+      // [event]/[sync] 연동방식 태그는 슬러그가 아니라 메타데이터 — 떼어내고 비교(규약 §연동 방식)
+      const to = (m[1] || "").replace(/\s*\[[^\]]*\]\s*$/, "").trim();
+      if (m.length === 2 && m[0] && to) edges.add(key({ from: m[0], to }));
     }
   }
   return { tableSlugs, edges };
