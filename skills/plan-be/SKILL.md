@@ -5,7 +5,7 @@ description: BE 도메인 1개의 데이터(M)와 기능(C)을 사람과 끌어�
 
 # plan-be — BE 도메인 명세 (기획 전단 3단계, BE 도출)
 
-BE 도메인의 *데이터(M) + 기능(C)*을 끌어낸다. BE는 **FE 요소의 호출이 닿는 데이터·기능**이다. **sketch 목업이 있으면 [plan-fe](../plan-fe/SKILL.md)와 짝(코스펙)으로 sketch를 공유 소스 삼아 함께 깐다**(FE=호출자, BE=호출 대상, 한 패스). **없으면 FE-first 폴백** — plan-fe가 드러낸 FE 호출에서 도출한다. 어느 쪽이든 **BE는 '언제 부르나'를 모른다**(타이밍은 FE 소유, 참조는 FE→BE 일방향). 전제: [decompose](../decompose/SKILL.md)로 HOME 확정. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/be/<name>/`.
+BE 도메인의 *데이터(M) + 기능(C)*을 끌어낸다. BE는 **FE 요소의 호출이 닿는 데이터·기능**이다. **sketch 목업이 있으면 [plan-fe](../plan-fe/SKILL.md)와 짝(코스펙)으로 sketch를 공유 소스 삼아 함께 깐다**(FE=호출자, BE=호출 대상, 한 패스). **없으면 FE-first 폴백** — plan-fe가 드러낸 FE 호출에서 도출. 어느 쪽이든 **BE는 '언제 부르나'를 모른다**(타이밍은 FE 소유, 참조 FE→BE 일방향). 전제: [decompose](../decompose/SKILL.md)로 HOME 확정. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/be/<name>/`.
 
 ## 경계 (절대 규칙)
 - BE 도메인 = **데이터(M) + 기능(C)** 만. 플로우·화면·연출(V)은 FE. 기능 문서는 "무슨 데이터를 읽고 어떻게 처리하나"만 — 언제 부르나는 FE가 정한다.

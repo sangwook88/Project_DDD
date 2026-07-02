@@ -5,7 +5,7 @@ description: FE 도메인 1개의 플로우 + 표현(V)을 사람과 끌어내�
 
 # plan-fe — FE 도메인 명세 (기획 전단 3단계, FE 선행)
 
-FE 도메인의 *플로우 + 표현(V)*을 끌어낸다. **sketch 목업이 있으면 그걸 공유 소스로 [plan-be](../plan-be/SKILL.md)와 짝(코스펙)** — FE 플로우·요소와 그 호출이 닿는 BE 데이터·기능을 한 패스에서 같이 깐다. **sketch가 없으면 FE-first** — FE를 먼저 구체화하고 요소가 부르는 기능에서 BE를 도출한다. 요소는 BE 기능을 **링크로만** 부른다(FE→BE 단방향). 전제: [decompose](../decompose/SKILL.md)로 HOME 확정 + (있으면) sketch 목업. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/fe/<name>/`.
+FE 도메인의 *플로우 + 표현(V)*을 끌어낸다. **sketch 목업이 있으면 그걸 공유 소스로 [plan-be](../plan-be/SKILL.md)와 짝(코스펙)** — FE 플로우·요소와 그 호출이 닿는 BE 데이터·기능을 한 패스에 같이 깐다. **없으면 FE-first** — FE를 먼저 구체화하고 요소가 부르는 기능에서 BE를 도출. 요소는 BE 기능을 **링크로만** 부른다(FE→BE 단방향). 전제: [decompose](../decompose/SKILL.md)로 HOME 확정 + (있으면) sketch 목업. 규약: [docs/conventions.md](${DDD_ROOT}/docs/conventions.md). 산출: `docs/fe/<name>/`.
 
 ## 경계 (절대 규칙)
 - FE = **플로우(오케스트레이션) + 표현(V)** 만. 기능 구현 로직은 BE 도메인. 요소가 호출하는 기능은 BE 기능 **링크만**.
