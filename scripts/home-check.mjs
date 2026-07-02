@@ -9,16 +9,19 @@
 //   ② 요소/*.md `## 호출하는 기능` 링크 — FE→BE 호출
 // 이 둘에서 역산한 엣지 ↔ HOME ## 참조 그래프 엣지를 대조한다.
 //
-// 사용: node home-check.mjs --root <docs>
+// 사용: node home-check.mjs --root <docs> [--code-root <repo>] [--fix]
 // exit 0 = 일치, 1 = 불일치(게이트·CI에서 막을 수 있게).
+// --fix: 엣지 드리프트(HOME↔선언)를 자동 재조정(빠진 엣지 추가·stale 제거, [event]·주석 보존).
+//        폴더/코드/순환 문제는 자동으로 못 고치므로 남으면 여전히 exit 1.
 import fs from "node:fs";
 import path from "node:path";
 
 const root = (() => {
   const i = process.argv.indexOf("--root");
-  if (i < 0) { console.error("usage: node home-check.mjs --root <docs> [--code-root <repo>]"); process.exit(2); }
+  if (i < 0) { console.error("usage: node home-check.mjs --root <docs> [--code-root <repo>] [--fix]"); process.exit(2); }
   return process.argv[i + 1];
 })();
+const doFix = process.argv.includes("--fix");
 
 // 코드는 docs 바깥(src/)에 산다. 기본 코드 루트 = docs 루트의 상위(레포 루트).
 const codeRoot = (() => {
@@ -155,6 +158,39 @@ function findCycle(edgeKeys) {
   return cyc;
 }
 
+// ── 재조정 (--fix): 선언에서 유도한 엣지에 HOME을 병합 ──
+// 빠진 엣지 추가 + stale 제거. 살아남는 엣지의 [event]·주석은 그대로 보존(재생성 아님).
+function edgeKeyOf(line) {
+  const m = line.replace(/^-\s*/, "").split("#")[0].split(/→|->/).map((s) => s.trim());
+  const to = (m[1] || "").replace(/\s*\[[^\]]*\]\s*$/, "").trim();
+  return (m.length === 2 && m[0] && to) ? key({ from: m[0], to }) : null;
+}
+function fixHome(homeOnly, realOnly) {
+  const file = path.join(root, "HOME.md");
+  const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
+  const stale = new Set(homeOnly);
+  const missing = realOnly.map((e) => {
+    const [f, to] = e.split(" → ");
+    return `- ${f} → ${to}  # 자동 추가 — 연동방식(sync/event) 확인`;
+  });
+  const out = [];
+  let inGraph = false, added = 0, removed = 0;
+  const flushMissing = () => { for (const l of missing) { out.push(l); added++; } };
+  for (const raw of lines) {
+    const t = raw.trim();
+    if (t.startsWith("## ")) {
+      if (inGraph) flushMissing();               // 그래프 섹션 끝 — 빠진 엣지 append
+      inGraph = t.slice(3).trim() === "참조 그래프";
+      out.push(raw); continue;
+    }
+    if (inGraph && t.startsWith("-") && stale.has(edgeKeyOf(t))) { removed++; continue; }
+    out.push(raw);
+  }
+  if (inGraph) flushMissing();                    // 그래프가 마지막 섹션이면 EOF에 append
+  fs.writeFileSync(file, out.join("\n"));
+  return { added, removed };
+}
+
 // ── 대조 ──
 const home = parseHome();
 const real = deriveEdges();
@@ -182,6 +218,13 @@ report("HOME 표에 있으나 폴더 없음", noFolder, "오타이거나 미생�
 report("폴더 있으나 HOME 표에 없음", noTable, "decompose로 HOME 표에 등재");
 report("코드 위치 없음/빔 (status≠not-started)", codeMissing, "src/<slug> 에 코드를 두거나 README code: 로 위치 명시");
 if (cycle) console.log(`\n## ✗ 순환 의존\n- ${cycle.join(" → ")}\n  → 단방향·비순환 규약 위반 — 경계 재검토`);
+if (doFix && (homeOnly.length || realOnly.length)) {
+  const { added, removed } = fixHome(homeOnly, realOnly);
+  console.log(`\n🔧 --fix: HOME ## 참조 그래프 재조정 — 추가 ${added}, 제거 ${removed}. 새 엣지 연동방식(sync/event) 확인 후 커밋하세요.`);
+}
+// 엣지 드리프트(homeOnly/realOnly)는 --fix로 해소. 폴더/표/코드/순환은 자동으로 못 고침 → 남으면 불일치.
+const okAfterFix = !noFolder.length && !noTable.length && !codeMissing.length && !cycle;
 if (ok) console.log("\n선언 그래프와 폴더 현실이 일치합니다. 팩을 신뢰할 수 있습니다.");
+else if (doFix && okAfterFix) console.log("\n엣지 드리프트를 재조정했습니다 — 나머지 문제 없음. 재검증 권장.");
 
-process.exit(ok ? 0 : 1);
+process.exit((doFix ? okAfterFix : ok) ? 0 : 1);

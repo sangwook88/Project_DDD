@@ -1,0 +1,25 @@
+name: ddd-check
+
+# 게이트: 회귀 테스트 + HOME 정합성. 여기서는 --fix 안 함(탐지만) —
+# 불일치로 막히면 graph-sync 스킬로 재조정하는 게 흐름이다(사람이 diff 검토).
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 회귀 테스트 (스크립트 3종 + 예제)
+        run: npm test
+
+      - name: HOME 정합성 (docs/HOME.md 있을 때만)
+        run: |
+          if [ -f docs/HOME.md ]; then
+            node scripts/home-check.mjs --root docs
+          else
+            echo "docs/HOME.md 없음 — 도메인 분해 전이라 home-check 스킵"
+          fi
