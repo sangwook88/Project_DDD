@@ -25,6 +25,7 @@ FE/BE 2분할 DDD 프레임워크의 공통 규약. 스킬·에이전트가 이 
   - `docs/arch/ARCHITECTURE.md` — 전역 규약 + 기술 스택(arch 산출).
   - `docs/brainstorming/` — brainstorm 설계 브리프.
   - `docs/roadmap.md` — 버전 로드맵(v1→vN 스코프 표 + **현재 타깃 버전**, roadmap 산출).
+  - `docs/PRD.md` — 외부 공개용 PRD(제품 조망 한 장, prd 산출). 기획 산출물을 제품 가치로 번역한 파생 문서 — 단일 소스는 브리프·로드맵이고 PRD는 그걸 종합해 보여줄 뿐.
 
 ## 버전 게이트 (현재 타깃 버전)
 - `roadmap`이 핵심 기능 목록을 버전(v1→vN, 가변 N)으로 자르고 `docs/roadmap.md`에 **현재 타깃 버전**을 표시한다(MVP=v1). 버전 경계·우선순위는 AI가 짓지 않고 사람이 확정한다.

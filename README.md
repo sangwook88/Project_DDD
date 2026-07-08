@@ -10,7 +10,7 @@
 
 ![Tool](https://img.shields.io/badge/Claude%20Code-agents%2Bskills-8A2BE2)
 ![Install](https://img.shields.io/badge/install-npx-cb3837)
-![Skills](https://img.shields.io/badge/skills-13-339933)
+![Skills](https://img.shields.io/badge/skills-14-339933)
 
 ## 흐름
 
@@ -42,7 +42,7 @@ docs/
 
 ## 설치
 
-에이전트 4종 + 스킬 13종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
+에이전트 4종 + 스킬 14종 + 템플릿/스크립트 번들을 깔아줍니다. **어디에** 깔지를 먼저 정하세요.
 
 ### 전역 — 모든 프로젝트에서 사용 (기본)
 
@@ -144,7 +144,7 @@ raw/<문서>.md             intake 인박스 (처리되면 raw/_done/)
 ```text
 .claude/
 ├─ agents/      dev·plan·intake·research
-├─ skills/      brainstorm·sketch·roadmap·decompose·… ticket (13종)
+├─ skills/      brainstorm·sketch·roadmap·decompose·… ticket·prd (14종)
 ├─ docs/        conventions (규약)
 ├─ templates/   기능·데이터·요소·플로우·sim.html·ticket …
 └─ scripts/     implement.ps1
