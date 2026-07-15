@@ -1,2 +1,9 @@
 # Obsidian 볼트 설정 (에디터 로컬)
 .obsidian/
+
+# Notion 도구 시크릿 (.env.example 는 커밋, 실제 .env 는 제외)
+tools/notion/.env
+
+# Python 캐시
+__pycache__/
+*.pyc
